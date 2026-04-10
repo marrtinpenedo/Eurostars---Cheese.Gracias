@@ -1,0 +1,10 @@
+pandas
+numpy
+scikit-learn
+hdbscan
+umap-learn
+fastapi
+uvicorn
+python-multipart
+plotly
+pytest
