@@ -11,6 +11,8 @@ router = APIRouter()
 class HotelProjectRequest(BaseModel):
     hotel_id: str
 
+from src.api.routes.clusters import explain_cluster, ExplainRequest
+
 @router.post("/project")
 def project_hotel(req: HotelProjectRequest, app_req: Request):
     """
@@ -41,11 +43,42 @@ def project_hotel(req: HotelProjectRequest, app_req: Request):
         logger.error(f"Error projetando hotel {hotel_id_padded}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
         
+    hotel_name_str = str(hotel_serie.get("HOTEL_NAME", "Unknown"))
+    
+    # Formatear salida estructurada invocando explainer para la preview
+    results_list = []
+    
+    cards = getattr(app_req.app.state, "cluster_cards", [])
+    
+    for a in affine:
+        c_id = int(a[0])
+        dist = float(a[1])
+        
+        # Encontrar datos base si existen
+        c_card = next((c for c in cards if c["cluster_id"] == c_id), {})
+        size = c_card.get("size", 0)
+        
+        # Obtener la explicacion síncronamente (usará caché si ya se pidió)
+        try:
+            ex_data = explain_cluster(c_id, ExplainRequest(hotel_name=hotel_name_str), app_req)
+            preview = ex_data["bullets"][0] if ex_data.get("bullets") else "Ver detalles..."
+            c_name = ex_data.get("cluster_name", f"Segmento #{c_id}")
+        except Exception as e:
+            preview = "Previa no disponible."
+            c_name = f"Segmento #{c_id}"
+            
+        results_list.append({
+            "cluster_id": c_id,
+            "cluster_name": c_name,
+            "cluster_size": size,
+            "distance": round(dist, 3),
+            "explanation_preview": preview
+        })
+        
     return {
-        "hotel_name": str(hotel_serie.get("HOTEL_NAME", "Unknown")),
+        "hotel_name": hotel_name_str,
         "coords_3d": [float(x) for x in coords],
-        "affine_clusters": [int(a[0]) for a in affine],
-        "cluster_distances": [float(a[1]) for a in affine]
+        "affine_clusters": results_list
     }
 
 @router.get("/list")

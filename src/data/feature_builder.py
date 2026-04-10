@@ -49,13 +49,17 @@ class FeatureBuilder:
         # Agrupar por GUEST_ID
         history_vector = merged_df.groupby("GUEST_ID").agg(agg_dict_safe)
         
-        # Preferencia de clima (moda)
-        if "CITY_CLIMATE" in merged_df.columns:
-            def mode_func(x):
-                m = x.dropna().mode()
-                return m.iloc[0] if not m.empty else "UNKNOWN"
+        # Preferencia de clima u otras moda (mes)
+        def mode_func(x):
+            m = x.dropna().mode()
+            return m.iloc[0] if not m.empty else "UNKNOWN"
             
+        if "CITY_CLIMATE" in merged_df.columns:
             history_vector["FAV_CLIMATE"] = merged_df.groupby("GUEST_ID")["CITY_CLIMATE"].agg(mode_func)
+            
+        if "CHECKIN_MONTH" in merged_df.columns:
+            # Reusamos wrapper numérico x si mode_func da str
+            history_vector["PEAK_MONTH"] = merged_df.groupby("GUEST_ID")["CHECKIN_MONTH"].agg(lambda x: x.mode()[0] if not x.mode().empty else 6)
             
         # 3. One-Hot encoding de categóricas para el vector final
         categorical_cols = [c for c in ["COUNTRY_GUEST", "GENDER_ID", "FAV_CLIMATE"] if c in history_vector.columns]

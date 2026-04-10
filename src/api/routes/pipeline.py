@@ -81,9 +81,10 @@ def recluster(req: ReclusterRequest, app_req: Request):
     
     # 2. Perfilado y actualización de estado
     profiler = ClusterProfiler()
-    cards = profiler.generate_profiles(vec, labels, e3)
+    cards, global_stats = profiler.generate_profiles(vec, labels, e3)
     
     app_req.app.state.cluster_cards = cards
+    app_req.app.state.global_stats = global_stats
     app_req.app.state.labels = labels
     
     # 3. Payload de Visualización

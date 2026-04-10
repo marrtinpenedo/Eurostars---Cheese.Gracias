@@ -37,6 +37,10 @@ class DataPreprocessor:
             if col in df_clean.columns:
                 df_clean[col] = pd.to_numeric(df_clean[col], errors='coerce').fillna(0.0)
                 
+        # Extraer mes de CHECKIN para detectar season
+        if "CHECKIN_DATE" in df_clean.columns:
+            df_clean["CHECKIN_MONTH"] = pd.to_datetime(df_clean["CHECKIN_DATE"], errors='coerce').dt.month.fillna(6).astype(int)
+            
         return df_clean
 
     def preprocess_hotels(self, df: pd.DataFrame) -> pd.DataFrame:

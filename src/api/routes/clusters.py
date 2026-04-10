@@ -41,3 +41,42 @@ def export_cluster_csv(cluster_id: int, request: Request):
         "Content-Disposition": f"attachment; filename=segment_{cluster_id}_export.csv",
         "Content-Type": "text/csv"
     })
+
+from pydantic import BaseModel
+from typing import Optional
+from src.clustering.explainer import get_full_explanation
+
+class ExplainRequest(BaseModel):
+    hotel_name: Optional[str] = None
+
+@router.post("/{cluster_id}/explain")
+def explain_cluster(cluster_id: int, req: ExplainRequest, request: Request):
+    """
+    Despliega la explicación de marketing de un cluster usando la caché para no saturar OpenAI.
+    """
+    cards = getattr(request.app.state, "cluster_cards", None)
+    global_stats = getattr(request.app.state, "global_stats", None)
+    
+    if not cards or not global_stats:
+        raise HTTPException(status_code=400, detail="Debes analizar (recluster) primero para extraer los segmentos.")
+        
+    # Inicializar caché en el estado si no existe
+    if not hasattr(request.app.state, "explanations_cache"):
+        request.app.state.explanations_cache = {}
+        
+    cache_key = (cluster_id, req.hotel_name)
+    if cache_key in request.app.state.explanations_cache:
+        return request.app.state.explanations_cache[cache_key]
+        
+    # Generar
+    explanation = get_full_explanation(
+        cluster_id=cluster_id,
+        cluster_profiles=cards,
+        global_stats=global_stats,
+        hotel_name=req.hotel_name
+    )
+    
+    # Guardar en caché
+    request.app.state.explanations_cache[cache_key] = explanation
+    
+    return explanation
