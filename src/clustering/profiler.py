@@ -165,18 +165,30 @@ class ClusterProfiler:
         from src.clustering.explainer import get_genai_client
         genai_client = get_genai_client()
         
-        named_profiles = []
-        for profile in profiles:
+        import concurrent.futures
+        
+        def fetch_name(profile):
             temp_profile = profile['metrics'].copy()
             temp_profile['cluster_id'] = profile['cluster_id']
             temp_profile['cluster_size'] = profile['size']
-            
-            profile['name'] = self.generate_cluster_name_with_llm(
+            # Pasamos todos los perfiles a cada hilo para que el LLM tenga el contexto
+            # El método extrae sus 'metrics' ignorando si ya tienen 'name' o no.
+            name = self.generate_cluster_name_with_llm(
                 cluster_profile=temp_profile,
-                all_cluster_profiles=named_profiles,
+                all_cluster_profiles=profiles,
                 genai_client=genai_client
             )
-            named_profiles.append(profile)
+            return profile['cluster_id'], name
+
+        named_profiles = profiles.copy()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=15) as executor:
+            futures = [executor.submit(fetch_name, p) for p in profiles]
+            for future in concurrent.futures.as_completed(futures):
+                c_id, name = future.result()
+                for p in named_profiles:
+                    if p['cluster_id'] == c_id:
+                        p['name'] = name
+                        break
             
         profiles = self.ensure_unique_names(named_profiles)
             
