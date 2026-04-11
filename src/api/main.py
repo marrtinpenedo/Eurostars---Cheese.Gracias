@@ -8,6 +8,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+import os
+if not os.getenv("OPENAI_API_KEY"):
+    raise RuntimeError("OPENAI_API_KEY no encontrada en .env — revisa tu fichero .env")
+
 from src.api.routes import upload, pipeline, clusters, hotels
 
 logger = logging.getLogger(__name__)

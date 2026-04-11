@@ -1,16 +1,55 @@
 :root {
-    --bg-color: #0A0A0F;
-    --panel-bg: rgba(22, 22, 30, 0.65);
-    --border-color: rgba(255, 255, 255, 0.08);
-    --text-main: #FFFFFF;
-    --text-muted: #A0A0B0;
-    --accent: #7C3AED;
-    --accent-hover: #8B5CF6;
-    --accent-glow: rgba(124, 58, 237, 0.3);
-    
-    --success: #10B981;
-    --font-head: 'Outfit', sans-serif;
-    --font-body: 'Inter', sans-serif;
+  /* Fondos */
+  --bg-primary: #F5F6F8;      /* fondo principal gris muy claro */
+  --bg-card: #FFFFFF;          /* cards y paneles blancos */
+  --bg-sidebar: #FFFFFF;       /* panel lateral blanco */
+  --bg-header: #FFFFFF;        /* header blanco con sombra */
+
+  /* Texto */
+  --text-primary: #1A1D23;     /* texto principal casi negro */
+  --text-secondary: #6B7280;   /* texto secundario gris medio */
+  --text-muted: #9CA3AF;       /* texto terciario gris claro */
+
+  /* Acento corporativo */
+  --accent-primary: #2563EB;   /* azul corporativo — botones, highlights */
+  --accent-hover: #1D4ED8;     /* azul más oscuro para hover */
+  --accent-light: #EFF6FF;     /* azul muy claro para fondos de badge */
+
+  /* Clusters — paleta diferenciada y visible sobre fondo claro */
+  --cluster-1: #2563EB;   /* azul */
+  --cluster-2: #16A34A;   /* verde */
+  --cluster-3: #DC2626;   /* rojo */
+  --cluster-4: #D97706;   /* naranja */
+  --cluster-5: #7C3AED;   /* púrpura */
+  --cluster-6: #0891B2;   /* cyan */
+  --cluster-7: #BE185D;   /* rosa */
+  --cluster-8: #065F46;   /* verde oscuro */
+
+  /* Hoteles — colores DISTINTOS a los clusters, siempre visibles */
+  --hotel-1: #1A1D23;     /* negro — primer hotel */
+  --hotel-2: #92400E;     /* marrón — segundo hotel */
+  --hotel-3: #4C1D95;     /* morado oscuro — tercer hotel */
+  --hotel-icon-bg: #1A1D23;   /* fondo del icono de hotel */
+  --hotel-icon-color: #FFFFFF; /* icono hotel siempre blanco sobre fondo oscuro */
+
+  /* Bordes y sombras */
+  --border: #E5E7EB;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+
+  /* Estados */
+  --success: #16A34A;
+  --warning: #D97706;
+  --priority-gold: #F59E0B;
+  
+  --bg-color: var(--bg-primary);
+  --panel-bg: var(--bg-sidebar);
+  --border-color: var(--border);
+  --text-main: var(--text-primary);
+  --accent: var(--accent-primary);
+  
+  --font-head: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
 }
 
 * {
@@ -26,7 +65,7 @@ body {
     height: 100vh;
     overflow: hidden;
     background-image: 
-        radial-gradient(circle at 15% 50%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
         radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
 }
 
@@ -36,15 +75,15 @@ body {
     height: 100%;
 }
 
-/* NAVBAR */
+/* NAVBAR / HEADER */
 .glass-navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    background: rgba(10, 10, 15, 0.7);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-header);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
     z-index: 100;
 }
 
@@ -53,7 +92,7 @@ body {
     font-weight: 800;
     letter-spacing: 1px;
     font-size: 1.5rem;
-    background: linear-gradient(135deg, #fff, #a78bfa);
+    background: linear-gradient(135deg, #0F172A, #6366F1);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -216,9 +255,9 @@ input[type=range]::-webkit-slider-runnable-track {
 .slider-val { font-size: 0.8rem; color: var(--text-muted); }
 
 select {
-    background: rgba(0,0,0,0.5);
+    background: rgba(255,255,255,0.8);
     border: 1px solid var(--border-color);
-    color: white;
+    color: var(--text-main);
     padding: 0.6rem;
     border-radius: 6px;
     font-family: var(--font-body);
@@ -229,7 +268,7 @@ select {
 .canvas-container {
     flex: 1;
     position: relative;
-    background: radial-gradient(circle at center, #11111a 0%, #050508 100%);
+    background: radial-gradient(circle at center, #F8FAFC 0%, #E2E8F0 100%);
 }
 
 #plot3d {
@@ -238,7 +277,7 @@ select {
 
 .loader-overlay {
     position: absolute; inset: 0;
-    background: rgba(5,5,8,0.8);
+    background: rgba(248,250,252,0.8);
     backdrop-filter: blur(4px);
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
@@ -278,14 +317,14 @@ select {
 /* Skeleton Loading */
 .skeleton-title {
     height: 24px; width: 60%;
-    background: linear-gradient(90deg, #2a2a35 25%, #3a3a45 50%, #2a2a35 75%);
+    background: linear-gradient(90deg, #E2E8F0 25%, #F1F5F9 50%, #E2E8F0 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
     border-radius: 4px; margin-bottom: 1.5rem;
 }
 .skeleton-line {
     height: 14px; width: 100%; margin-bottom: 0.8rem;
-    background: linear-gradient(90deg, #2a2a35 25%, #3a3a45 50%, #2a2a35 75%);
+    background: linear-gradient(90deg, #E2E8F0 25%, #F1F5F9 50%, #E2E8F0 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
     border-radius: 4px;
@@ -303,10 +342,10 @@ select {
     font-size: 0.7rem; color: var(--accent); font-weight: 600;
     text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.3rem;
 }
-#ai-title { font-size: 1.2rem; line-height: 1.3; margin-bottom: 0.5rem; color: #fff;}
+#ai-title { font-size: 1.2rem; line-height: 1.3; margin-bottom: 0.5rem; color: var(--text-main);}
 .metrics-chip {
-    font-size: 0.75rem; background: rgba(255,255,255,0.1);
-    padding: 0.2rem 0.5rem; border-radius: 12px; color: #ccc;
+    font-size: 0.75rem; background: rgba(0,0,0,0.05);
+    padding: 0.2rem 0.5rem; border-radius: 12px; color: var(--text-muted);
 }
 
 .context-banner {
@@ -319,26 +358,26 @@ select {
     list-style: none; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;
 }
 .bullet-list li {
-    font-size: 0.85rem; line-height: 1.5; color: #E2E8F0;
-    background: rgba(255,255,255,0.03); padding: 0.8rem; border-radius: 6px;
+    font-size: 0.85rem; line-height: 1.5; color: var(--text-main);
+    background: rgba(0,0,0,0.03); padding: 0.8rem; border-radius: 6px;
     border: 1px solid transparent; transition: border-color 0.2s;
 }
 .bullet-list li:hover {
-    border-color: rgba(255,255,255,0.1);
+    border-color: rgba(0,0,0,0.1);
 }
 
 .mt-3 { margin-top: 1.5rem; }
 
 /* Stats box mini */
 .stats-panel { display: flex; gap: 1rem;}
-.stat-box { flex: 1; background: rgba(0,0,0,0.3); padding: 0.8rem; border-radius: 6px; text-align: center;}
+.stat-box { flex: 1; background: rgba(0,0,0,0.05); padding: 0.8rem; border-radius: 6px; text-align: center;}
 .stat-title { display: block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
-.stat-value { display: block; font-size: 1.2rem; font-weight: 600; font-family: var(--font-head); margin-top: 0.2rem;}
+.stat-value { display: block; font-size: 1.2rem; font-weight: 600; font-family: var(--font-head); margin-top: 0.2rem; color: var(--text-main);}
 
 /* SEGMENT CARDS */
 .cards-container {
     padding: 1.5rem 2rem;
-    background: rgba(10, 10, 15, 0.85);
+    background: rgba(255, 255, 255, 0.85);
     border-top: 1px solid var(--border-color);
     z-index: 100;
 }
@@ -364,19 +403,19 @@ select {
 
 .segment-card {
     min-width: 260px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1.2rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .segment-card:hover {
-    border-color: var(--accent);
+    border-color: var(--accent-primary);
     transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.06);
-    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.1);
+    box-shadow: var(--shadow-md);
 }
 
 .card-header {
@@ -389,14 +428,42 @@ select {
 .card-color-indicator {
     width: 12px; height: 12px;
     border-radius: 50%;
-    background: var(--accent);
+    /* Se aplicará color dinámico */
+}
+
+/* PILLS */
+.hotel-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 2px solid;
+  background: var(--bg-card);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-right: 8px;
+  margin-top: 8px;
+}
+.hotel-pill .remove-hotel {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+}
+.hotel-pill .remove-hotel:hover {
+  color: var(--cluster-3); /* rojo */
 }
 
 .card-title {
     font-size: 0.95rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
-    color: #fff;
+    color: var(--text-main);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

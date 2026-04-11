@@ -15,16 +15,17 @@ export const viz3d = {
     /**
      * scatterData: array de {x, y, z, cluster, guest_id}
      * numClusters: int
-     * projHotel: opcional {name, coords_3d: [x,y,z], affine_clusters}
+     * projData: opcional {hotels: [{id, name, coords_3d}], affine_clusters}
      */
-    render: (scatterData, numClusters, projHotel = null, onClusterClick = null) => {
+    render: (scatterData, numClusters, projData = null, onClusterClick = null) => {
         document.getElementById('loader-3d').classList.add('hidden');
         viz3d.currentData = scatterData;
-        viz3d.currentHotel = projHotel;
+        viz3d.currentHotel = projData; // internally kept as projData
 
         const container = document.getElementById(viz3d.plotId);
         
         let traces = [];
+        const HOTEL_COLORS = ['#1A1D23', '#92400E', '#4C1D95'];
         
         // Group points by cluster
         const grouped = {};
@@ -33,10 +34,9 @@ export const viz3d = {
             let affinePrefix = "";
             let hlMode = false;
             
-            if (projHotel && projHotel.affine_clusters) {
-                // If hotel projected, check if this point belongs to an affine cluster
+            if (projData && projData.affine_clusters) {
                 const cId = d.cluster;
-                const isAffine = projHotel.affine_clusters.some(c => c.cluster_id === cId);
+                const isAffine = projData.affine_clusters.some(c => c.cluster_id === cId);
                 if (isAffine) {
                     affinePrefix = "⭐ AFÍN - ";
                     hlMode = true;
@@ -50,20 +50,17 @@ export const viz3d = {
             grouped[d.cluster].ids.push(d.guest_id);
         });
 
-        // Palette generator
         const colors = [
-            "#7C3AED", "#10B981", "#DB2777", "#F59E0B", "#3B82F6", 
-            "#8B5CF6", "#14B8A6", "#F43F5E", "#EAB308", "#06B6D4",
-            "#D946EF", "#6366F1", "#EC4899", "#84CC16", "#22D3EE"
+            "#2563EB", "#16A34A", "#DC2626", "#D97706", "#7C3AED", 
+            "#0891B2", "#BE185D", "#065F46", "#EAB308", "#06B6D4"
         ];
 
-        // Create a trace per cluster
         Object.keys(grouped).forEach((k) => {
             let opacity = 0.6;
             let size = 3;
             // Highlight logic
-            if (projHotel) {
-                const isAffine = projHotel.affine_clusters.some(c => c.cluster_id === parseInt(k));
+            if (projData) {
+                const isAffine = projData.affine_clusters.some(c => c.cluster_id === parseInt(k));
                 if (isAffine) {
                     opacity = 0.9;
                     size = 5;
@@ -82,51 +79,56 @@ export const viz3d = {
                 marker: {
                     size: size,
                     color: colors[parseInt(k) % colors.length],
-                    opacity: opacity
+                    opacity: opacity,
+                    line: { width: 0 }
                 },
-                customdata: grouped[k].x.map(() => parseInt(k)) // Store cluster ID for click events
+                customdata: grouped[k].x.map(() => parseInt(k))
             });
         });
 
-        // Si hay hotel, dibujar un marcador especial
-        if (projHotel) {
-            traces.push({
-                x: [projHotel.coords_3d[0]],
-                y: [projHotel.coords_3d[1]],
-                z: [projHotel.coords_3d[2]],
-                mode: 'markers+text',
-                type: 'scatter3d',
-                name: `🏨 ${projHotel.hotel_name}`,
-                text: [`🏨 ${projHotel.hotel_name}`],
-                textposition: 'top center',
-                textfont: { color: '#FFFFFF', size: 14, weight: 'bold' },
-                hoverinfo: 'text',
-                marker: {
-                    size: 15,
-                    color: '#FFFFFF',
-                    symbol: 'diamond'
-                }
+        // Hotels projection markers
+        if (projData && projData.hotels) {
+            projData.hotels.forEach((hotel, index) => {
+                traces.push({
+                    x: [hotel.coords_3d[0]],
+                    y: [hotel.coords_3d[1]],
+                    z: [hotel.coords_3d[2]],
+                    mode: 'markers+text',
+                    type: 'scatter3d',
+                    name: `🏨 ${hotel.name}`,
+                    text: [`🏨 ${hotel.name}`],
+                    textposition: 'top center',
+                    textfont: { color: '#1A1D23', size: 14, weight: 'bold' },
+                    hoverinfo: 'text',
+                    marker: {
+                        size: 15,
+                        color: HOTEL_COLORS[index] || '#1A1D23',
+                        symbol: 'diamond'
+                    }
+                });
             });
         }
 
         const layout = {
             margin: {l: 0, r: 0, b: 0, t: 0},
-            paper_bgcolor: 'rgba(0,0,0,0)',
+            paper_bgcolor: '#FFFFFF',
+            plot_bgcolor: '#F5F6F8',
             scene: {
-                xaxis: { showgrid: true, zeroline: false, showline: false, visible: false },
-                yaxis: { showgrid: true, zeroline: false, showline: false, visible: false },
-                zaxis: { showgrid: true, zeroline: false, showline: false, visible: false },
+                bgcolor: '#F5F6F8',
+                xaxis: { showgrid: true, gridcolor: '#E5E7EB', color: '#6B7280', zeroline: false, showline: false },
+                yaxis: { showgrid: true, gridcolor: '#E5E7EB', color: '#6B7280', zeroline: false, showline: false },
+                zaxis: { showgrid: true, gridcolor: '#E5E7EB', color: '#6B7280', zeroline: false, showline: false },
                 camera: { eye: {x: 1.5, y: 1.5, z: 0.5} }
             },
+            font: { color: '#1A1D23', family: 'Inter, system-ui, sans-serif' },
             showlegend: false
         };
 
         Plotly.newPlot(container, traces, layout, {displayModeBar: false});
 
-        // Bind click event
         if (onClusterClick) {
             container.on('plotly_click', function(data) {
-                if(data.points[0].customdata !== undefined){
+                if(data.points && data.points[0] && data.points[0].customdata !== undefined){
                     const clickedClusterId = data.points[0].customdata;
                     onClusterClick(clickedClusterId);
                 }

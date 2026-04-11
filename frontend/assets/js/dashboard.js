@@ -11,6 +11,7 @@ export const dashboard = {
         statClusters: document.getElementById('stat-n-clusters'),
         hotelDropdown: document.getElementById('hotel-dropdown'),
         projectBtn: document.getElementById('btn-project'),
+        activeHotelsContainer: document.getElementById('active-hotels-container'),
         
         cardsContainer: document.getElementById('segment-cards-container'),
         cardsScroller: document.getElementById('cards-scroller'),
@@ -28,7 +29,7 @@ export const dashboard = {
         btnExport: document.getElementById('btn-export-csv')
     },
 
-    init: (onSliderChange, onProjectBtn, onExportBtn) => {
+    init: (onSliderChange, onProjectBtn, onRemoveHotelBtn, onExportBtn) => {
         dashboard.els.slider.addEventListener('change', (e) => {
             const val = e.target.value;
             dashboard.els.sliderVal.textContent = val;
@@ -37,7 +38,14 @@ export const dashboard = {
 
         dashboard.els.projectBtn.addEventListener('click', () => {
             const hid = dashboard.els.hotelDropdown.value;
-            if(hid) onProjectBtn(hid);
+            const hname = dashboard.els.hotelDropdown.options[dashboard.els.hotelDropdown.selectedIndex].text;
+            if(hid) {
+                onProjectBtn(hid, hname);
+                // Reset dropdown
+                dashboard.els.hotelDropdown.value = "";
+                dashboard.els.projectBtn.classList.add('disabled');
+                dashboard.els.projectBtn.setAttribute('disabled', 'true');
+            }
         });
 
         dashboard.els.hotelDropdown.addEventListener('change', (e) => {
@@ -53,6 +61,35 @@ export const dashboard = {
         dashboard.els.btnExport.addEventListener('click', (e) => {
             const cid = e.target.dataset.clusterId;
             if(cid) onExportBtn(cid);
+        });
+        
+        dashboard.onRemoveHotelBtn = onRemoveHotelBtn;
+    },
+
+    renderActiveHotels: (activeHotels) => {
+        const container = dashboard.els.activeHotelsContainer;
+        container.innerHTML = '';
+        
+        const HOTEL_COLORS = ['#1A1D23', '#92400E', '#4C1D95'];
+        
+        activeHotels.forEach((hotel, index) => {
+            const span = document.createElement('span');
+            span.className = 'hotel-pill';
+            span.style.borderColor = HOTEL_COLORS[index] || '#1A1D23';
+            
+            span.innerHTML = `
+                🏨 ${hotel.name}
+                <button class="remove-hotel" data-id="${hotel.id}">×</button>
+            `;
+            container.appendChild(span);
+        });
+        
+        // Add listeners to buttons
+        container.querySelectorAll('.remove-hotel').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.target.dataset.id;
+                if(dashboard.onRemoveHotelBtn) dashboard.onRemoveHotelBtn(id);
+            });
         });
     },
 

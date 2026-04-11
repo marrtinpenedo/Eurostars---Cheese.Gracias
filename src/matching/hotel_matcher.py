@@ -76,15 +76,47 @@ class HotelMatcher:
         if not centroids:
             return []
             
-        # Preparar para distancias Euclidianas
         cluster_ids = list(centroids.keys())
         centroid_coords = np.array([centroids[c] for c in cluster_ids])
         
         h_vec = hotel_vector_3d.reshape(1, -1)
         distances = cdist(h_vec, centroid_coords, metric='euclidean')[0]
         
-        # Juntar ID_del_cluster con su Distancia
         dist_records = [(cluster_ids[i], distances[i]) for i in range(len(cluster_ids))]
+        dist_records.sort(key=lambda x: x[1])
+        
+        return dist_records[:top_n]
+
+    def get_intersection_clusters(self, hotels_coords: list, top_n: int = 3):
+        """
+        Dada una lista de coordenadas 3D correspondientes a los hoteles seleccionados,
+        calcula la distancia euclídea máxima desde cada cluster a dichos hoteles
+        y ordena para encontrar el cluster intersección.
+        """
+        if not os.path.exists(self.centroids_path):
+            raise FileNotFoundError("Centroides no calculados. Ejecuta profiler.py primero.")
+            
+        with open(self.centroids_path, "rb") as f:
+            centroids = pickle.load(f)
+            
+        if not centroids:
+            return []
+            
+        cluster_ids = list(centroids.keys())
+        centroid_coords = np.array([centroids[c] for c in cluster_ids])
+        
+        # Array of max distances per cluster
+        # Shape: (len(cluster_ids), )
+        max_distances = np.zeros(len(cluster_ids))
+        
+        for i, c_coord in enumerate(centroid_coords):
+            # distancias desde este centroide a TODOS los hoteles
+            c_vec = c_coord.reshape(1, -1)
+            h_coords = np.array(hotels_coords)
+            dists = cdist(c_vec, h_coords, metric='euclidean')[0]
+            max_distances[i] = np.max(dists)
+            
+        dist_records = [(cluster_ids[i], max_distances[i]) for i in range(len(cluster_ids))]
         dist_records.sort(key=lambda x: x[1])
         
         return dist_records[:top_n]

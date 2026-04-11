@@ -8,7 +8,7 @@ import { dashboard } from './dashboard.js';
 
 let appState = {
     numClusters: 0,
-    currentHotel: null // the projected hotel data
+    activeHotels: [] // List of {id, name}
 };
 
 async function init() {
@@ -18,6 +18,7 @@ async function init() {
     dashboard.init(
         handleSliderChange,
         handleProjectHotel,
+        handleRemoveHotel,
         handleExportCSV
     );
 
@@ -39,7 +40,6 @@ async function runPipeline() {
         const execInfo = await stayprintAPI.executePipeline();
         console.log("Pipeline executed", execInfo);
         
-        // Use suggested cluster size to initial reclustering
         let initialSize = 5;
         if(execInfo.suggestion && execInfo.suggestion.optimal_min_cluster_size) {
             initialSize = execInfo.suggestion.optimal_min_cluster_size;
@@ -60,16 +60,15 @@ async function runRecluster(minSize) {
     try {
         const reclusterData = await stayprintAPI.recluster(minSize);
         appState.numClusters = reclusterData.n_clusters;
-        appState.currentHotel = null; // reset projection
+        appState.activeHotels = []; // reset projection
+        dashboard.renderActiveHotels(appState.activeHotels);
         
         dashboard.updateGlobalStats(reclusterData);
         
-        // Draw 3D
         viz3d.render(reclusterData.scatter_data, reclusterData.n_clusters, null, handleClusterClick);
         
-        // Fetch and draw cards
         const summary = await stayprintAPI.getSummary();
-        dashboard.renderCards(summary, handleClusterClick);
+        dashboard.renderCards(summary.clusters || summary, handleClusterClick);
 
     } catch (e) {
         console.error(e);
@@ -85,13 +84,21 @@ async function handleSliderChange(val) {
     }
 }
 
-async function handleProjectHotel(hotelId) {
+async function updateHotelProjection() {
+    dashboard.renderActiveHotels(appState.activeHotels);
+    
+    if (appState.activeHotels.length === 0) {
+        if(viz3d.currentData) {
+            viz3d.render(viz3d.currentData, appState.numClusters, null, handleClusterClick);
+        }
+        return;
+    }
+    
     viz3d.initPlot();
     try {
-        const projData = await stayprintAPI.projectHotel(hotelId);
-        appState.currentHotel = projData;
+        const hotelIds = appState.activeHotels.map(h => h.id);
+        const projData = await stayprintAPI.projectHotel(hotelIds);
         
-        // We need to re-render but without fetching scatter again, we just reuse viz3d.currentData
         if(viz3d.currentData) {
             viz3d.render(viz3d.currentData, appState.numClusters, projData, handleClusterClick);
         } else {
@@ -99,15 +106,30 @@ async function handleProjectHotel(hotelId) {
         }
     } catch (e) {
         console.error(e);
-        alert("Error proyectando hotel: " + e.message);
+        alert("Error proyectando hoteles: " + e.message);
         document.getElementById('loader-3d').classList.add('hidden');
     }
+}
+
+async function handleProjectHotel(hotelId, hotelName) {
+    if (appState.activeHotels.find(h => h.id === hotelId)) return; // duplicados
+    if (appState.activeHotels.length >= 3) {
+        alert("Máximo 3 hoteles simultáneos");
+        return;
+    }
+    appState.activeHotels.push({ id: hotelId, name: hotelName });
+    await updateHotelProjection();
+}
+
+async function handleRemoveHotel(hotelId) {
+    appState.activeHotels = appState.activeHotels.filter(h => h.id !== hotelId);
+    await updateHotelProjection();
 }
 
 async function handleClusterClick(clusterId) {
     dashboard.showAILoading();
     try {
-        const hotelName = appState.currentHotel ? appState.currentHotel.hotel_name : null;
+        const hotelName = appState.activeHotels.length > 0 ? appState.activeHotels.map(h=>h.name).join(' + ') : null;
         const result = await stayprintAPI.explainCluster(clusterId, hotelName);
         dashboard.showAIResult(result, hotelName);
     } catch (e) {
@@ -126,5 +148,4 @@ function handleExportCSV(clusterId) {
     window.location.href = `/api/clusters/${clusterId}/export`;
 }
 
-// Arranque
 document.addEventListener('DOMContentLoaded', init);

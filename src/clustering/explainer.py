@@ -7,10 +7,14 @@ Genera explicaciones humanizadas de cada cluster en dos pasos:
 """
 
 import os
+from dotenv import load_dotenv
 import openai
 import json
 import logging
 from typing import Optional
+
+load_dotenv()
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 logger = logging.getLogger(__name__)
 

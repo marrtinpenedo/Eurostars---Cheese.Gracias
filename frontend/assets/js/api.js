@@ -33,14 +33,14 @@ export const stayprintAPI = {
         return response.json();
     },
 
-    // 4. Proyectar Hotel
-    projectHotel: async (hotelId) => {
+    // 4. Proyectar multiples hoteles
+    projectHotel: async (hotelIds) => {
         const response = await fetch(`${API_BASE}/hotels/project`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ hotel_id: hotelId })
+            body: JSON.stringify({ hotel_ids: hotelIds })
         });
-        if (!response.ok) throw new Error("Failed to project hotel.");
+        if (!response.ok) throw new Error("Failed to project hotels.");
         return response.json();
     },
 
