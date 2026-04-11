@@ -9,31 +9,59 @@ Construye un vector de identidad de viaje a partir del comportamiento histórico
 
 ---
 
-## 🚀 Setup Rápido (Entorno Aislado VENV)
+## 🚀 Opciones de Instalación
 
-Sigue estos pasos para arrancar el entorno de Inteligencia Artificial (Backend y Frontend SPA incluidos). Recomendamos usar un entorno virtual (`venv`) para aislar el proyecto de tu sistema.
+Puedes arrancar el proyecto de la forma **Manual** (ideal si eres principiante o quieres control total) o de la forma **Rápida** (si estás acostumbrado a usar rutinas Automáticas).
 
-1. **Crear Entorno Virtual e Instalar Dependencias**
+### Opción A: Instalación Manual y Segura (Recomendada)
+Esta opción aísla el proyecto en una "caja de arena" (`venv`) para no ensuciar tu ordenador.
+
+1. **Crear y Activar tu Entorno Virtual:**
    ```bash
    python3 -m venv venv
-   source venv/bin/activate  # En Linux/Mac
-   # venv\Scripts\activate   # En Windows
    
-   make install
+   # Activa el entorno en macOS / Linux:
+   source venv/bin/activate
+   # O actívalo si estás en Windows:
+   # venv\Scripts\activate
+   ```
+   *(Sabrás que funcionó porque a la izquierda de la terminal pondrá `(venv)`)*
+
+2. **Instalar las Librerías:**
+   ```bash
+   pip install -r requirements.txt
    ```
 
-2. **Configurar Entorno (Inyectar LLM)**
-   Copia el archivo de prueba y añade tu clave de **Groq** para habilitar el motor ultra-rápido de explicabilidad en lenguaje natural (modelo *Llama-3.3-70b-versatile*).
+### Opción B: Instalación Rápida (Usuarios de "Make")
+Si tienes instalada la herramienta `make` en tu sistema operativo, puedes omitir la creación de entornos y dejar que nuestros atajos automáticos hagan el trabajo pesado.
+*(Nota: `make install` ejecuta internamente `pip install -r requirements.txt`)*
+
+```bash
+make install
+```
+
+---
+
+## ⚙️ Configuración y Arranque (¡Para ambas Opciones!)
+
+1. **Configurar tu Cerebro IA (Groq)**
+   STAYPRINT usa **Groq** (Llama-3) para dotar a los grupos de explicaciones humanas.
    ```bash
+   # Duplica el archivo de claves:
    cp .env.example .env
-   # Edita .env con nano o vim para agregar tu GROQ_API_KEY
    ```
+   Abre el nuevo archivo `.env` en cualquier Bloc de Notas e introduce tu clave real. Debería quedar así: `GROQ_API_KEY=gsk_TuClave123...` (Siempre SIN comillas).
 
-3. **Arrancar el Servidor**
+2. **Arrancar el Servidor**
    ```bash
+   # Si usaste la Opción A (Modo Manual):
+   uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+   
+   # Si usaste la Opción B (Modo Rápido / Make):
    make run
-   # Accede a http://localhost:8000
    ```
+   
+🌍 **¡HECHO!** Abre tu navegador y explora nuestra Nube Geodésica en: **http://localhost:8000**
 
 ---
 
