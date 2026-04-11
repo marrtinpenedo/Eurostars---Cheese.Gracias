@@ -127,14 +127,19 @@ export const dashboard = {
     renderCards: (cards, onCardClick) => {
         dashboard.lastCards = cards;
         dashboard.lastOnCardClick = onCardClick;
+
+        // Guard M2: el panel inferior fue eliminado del DOM.
+        // La función debe seguir existiendo (se reutiliza en Vista 2 via clusterCards).
+        const cardsContainer = dashboard.els.cardsContainer;
+        const scroller      = dashboard.els.cardsScroller;
+        if (!cardsContainer || !scroller) return;
         
         if (!cards || cards.length === 0) {
-            dashboard.els.cardsContainer.classList.add('hidden');
+            cardsContainer.classList.add('hidden');
             return;
         }
         
-        dashboard.els.cardsContainer.classList.remove('hidden');
-        const scroller = dashboard.els.cardsScroller;
+        cardsContainer.classList.remove('hidden');
         scroller.innerHTML = '';
         
         const colors = [
