@@ -18,22 +18,18 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '..', '.en
 
 def get_openai_client() -> OpenAI:
     """
-    Inicializa el cliente OpenAI leyendo la key del entorno.
-    Lanza error descriptivo si no encuentra la key.
+    Inicializa el cliente de Groq (compatible SDK OpenAI) leyendo la key del entorno.
     """
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
         raise RuntimeError(
-            "OPENAI_API_KEY no encontrada. "
-            "Asegúrate de que existe un fichero .env en la raíz del proyecto "
-            "con la línea: OPENAI_API_KEY=sk-... (sin comillas)"
+            "GROQ_API_KEY no encontrada. "
+            "Asegúrate de que existe un fichero .env con GROQ_API_KEY=gsk_..."
         )
-    if api_key.startswith('"') or api_key.startswith("'"):
-        raise RuntimeError(
-            "OPENAI_API_KEY tiene comillas. "
-            "Edita el .env y elimina las comillas alrededor del valor."
-        )
-    return OpenAI(api_key=api_key)
+    return OpenAI(
+        api_key=api_key,
+        base_url="https://api.groq.com/openai/v1"
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +96,7 @@ Datos del segmento ({cluster_size} clientes, sus desvíos vs media):
 Devuelve estrictamente un array JSON plano de strings. El PRIMER elemento debe ser un Título creativo para el cluster (ej: "🚀 Viajero Urbano Premium"), los siguientes hasta 5 elementos serán los bullets puros donde cada uno empieza con un emoji relevante, sin tecnicismos y muy vendedor para marketing."""
 
         response = client.chat.completions.create(
-            model=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
+            model=os.environ.get("OPENAI_MODEL", "llama-3.3-70b-versatile"),
             messages=[
                 {"role": "system", "content": "Eres un director analista de marketing hotelero. Devuelve ÚNICAMENTE un array JSON válido de strings sin bloque markdown ni texto extra."},
                 {"role": "user", "content": user_prompt}

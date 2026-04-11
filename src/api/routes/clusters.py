@@ -57,11 +57,11 @@ async def debug_openai():
         client = get_openai_client()
         # Llamada mínima para verificar autenticación
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": "di ok"}],
             max_tokens=5
         )
-        return {"status": "ok", "model": "gpt-4o-mini", "response": response.choices[0].message.content}
+        return {"status": "ok", "model": "llama-3.3-70b-versatile", "response": response.choices[0].message.content}
     except Exception as e:
         return {"status": "error", "detail": str(e)}
 

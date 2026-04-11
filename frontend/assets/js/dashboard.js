@@ -63,6 +63,15 @@ export const dashboard = {
             if(cid) onExportBtn(cid);
         });
         
+        const toggleNames = document.getElementById('toggle-names');
+        if (toggleNames) {
+            toggleNames.addEventListener('change', () => {
+                if (dashboard.lastCards) {
+                    dashboard.renderCards(dashboard.lastCards, dashboard.lastOnCardClick);
+                }
+            });
+        }
+        
         dashboard.onRemoveHotelBtn = onRemoveHotelBtn;
     },
 
@@ -112,6 +121,9 @@ export const dashboard = {
     },
 
     renderCards: (cards, onCardClick) => {
+        dashboard.lastCards = cards;
+        dashboard.lastOnCardClick = onCardClick;
+        
         if (!cards || cards.length === 0) {
             dashboard.els.cardsContainer.classList.add('hidden');
             return;
@@ -126,18 +138,24 @@ export const dashboard = {
             "#8B5CF6", "#14B8A6", "#F43F5E", "#EAB308", "#06B6D4"
         ];
 
+        const useNaturalNames = document.getElementById('toggle-names')?.checked ?? true;
+
         cards.forEach(card => {
             const div = document.createElement('div');
             div.className = 'segment-card';
+            
+            const titleStr = useNaturalNames ? (card.name || 'Segmento ' + card.cluster_id) : `Segmento #${card.cluster_id}`;
+            const adrVal = card.metrics ? card.metrics.adr : (card.adr_mean || 0);
+            
             div.innerHTML = `
                 <div class="card-header">
                     <span class="card-color-indicator" style="background:${colors[card.cluster_id % colors.length]}"></span>
                     <span class="badge">#${card.cluster_id}</span>
                 </div>
-                <h4 class="card-title">${card.name || 'Segmento ' + card.cluster_id}</h4>
+                <h4 class="card-title" title="${titleStr}">${titleStr}</h4>
                 <div class="card-stats">
-                    <span>👥 ${card.size}</span>
-                    <span>💶 €${parseFloat(card.adr_mean || 0).toFixed(0)}</span>
+                    <span title="Tamaño del segmento">👥 ${card.size}</span>
+                    <span title="ADR (Average Daily Rate): Gasto promedio diario estimado">💶 €${parseFloat(adrVal).toFixed(0)}</span>
                 </div>
             `;
             div.addEventListener('click', () => onCardClick(card.cluster_id));

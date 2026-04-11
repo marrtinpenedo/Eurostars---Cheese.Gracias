@@ -129,13 +129,24 @@
             </aside>
         </main>
         
-        <!-- CARDS DE SEGMENTOS -->
-        <section id="segment-cards-container" class="cards-container hidden">
-            <h3 class="cards-title">Campañas Recomendadas</h3>
-            <div id="cards-scroller" class="cards-scroller">
-                <!-- JS inyectará cards -->
+        <!-- Recomendación Automática de Segmentos (Gallery) -->
+        <div id="segment-cards-container" class="cards-container hidden">
+            <div class="cards-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="font-size: 1.1rem; color: var(--text-main); font-weight: 600;">🎯 Campañas Recomendadas</h3>
+                <div class="toggle-container" style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                    <label for="toggle-names">Nombres Naturales</label>
+                    <label class="switch" style="position: relative; display: inline-block; width: 34px; height: 20px;">
+                        <input type="checkbox" id="toggle-names" checked style="opacity: 0; width: 0; height: 0;">
+                        <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--accent); transition: .4s; border-radius: 34px;">
+                            <span style="position: absolute; content: ''; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;"></span>
+                        </span>
+                    </label>
+                </div>
             </div>
-        </section>
+            <div id="cards-scroller" class="cards-scroller" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem;">
+                <!-- Cards se inyectan dinámicamente aquí -->
+            </div>
+        </div>
     </div>
 
     <!-- Modulos JS -->
