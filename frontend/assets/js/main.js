@@ -13,8 +13,29 @@ window.stayprintState = {
     numClusters: 0,
     activeHotels: [],
     affineClusters: new Set(),
-    selectedCluster: null
+    selectedCluster: null,
+    clusterCards: [] // explicit baseline array
 };
+
+// --- SPA VIEW ROUTING ---
+function showView(id) {
+    document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+    const target = document.getElementById(id);
+    if (target) target.classList.remove('hidden');
+}
+
+window.goToCampaigns = function() {
+    if (window.stayprintState.clusterCards && window.stayprintState.clusterCards.length > 0) {
+        showView("view-campaigns");
+    } else {
+        alert("Genera los segmentos primero procesando los datos.");
+    }
+};
+
+window.goToSegmentation = function() {
+    showView("view-segmentation");
+};
+// ------------------------
 
 window.syncAffinityUI = function() {
     const hasHotels = window.stayprintState.activeHotels.length > 0;
