@@ -11,8 +11,6 @@ router = APIRouter()
 class HotelProjectRequest(BaseModel):
     hotel_ids: list[str]
 
-from src.api.routes.clusters import explain_cluster, ExplainRequest
-
 @router.post("/project")
 def project_hotel(req: HotelProjectRequest, app_req: Request):
     """
@@ -73,13 +71,11 @@ def project_hotel(req: HotelProjectRequest, app_req: Request):
         c_card = next((c for c in cards if c["cluster_id"] == c_id), {})
         size = c_card.get("size", 0)
         
-        try:
-            ex_data = explain_cluster(c_id, ExplainRequest(hotel_name=combined_hotel_context), app_req)
-            preview = ex_data["bullets"][0] if ex_data.get("bullets") else "Ver detalles..."
-            c_name = ex_data.get("cluster_name", f"Segmento #{c_id}")
-        except Exception as e:
-            preview = "Previa no disponible."
-            c_name = f"Segmento #{c_id}"
+        c_name = c_card.get("name", f"Segmento #{c_id}")
+        metrics = c_card.get("metrics", {})
+        adr = metrics.get('adr', 0)
+        stays = metrics.get('stays', 0)
+        preview = f"ADR: €{adr:.0f} | Frecuencia: {stays}"
             
         results_list.append({
             "cluster_id": c_id,
