@@ -205,5 +205,45 @@ export const dashboard = {
             li.textContent = "No hay explicación disponible (verifica Vertex AI).";
             ul.appendChild(li);
         }
+    },
+
+    // Módulo 4 — Resumen estático de Vista 1 (sin llamada a /explain)
+    showClusterSummary: (clusterId) => {
+        const cards = (window.stayprintState && window.stayprintState.clusterCards) || [];
+        // Coerción Number() para evitar fallo string vs int proveniente de Plotly/D3
+        const card = cards.find(c => Number(c.cluster_id) === Number(clusterId));
+
+        // Transición de estado: ocultar empty/loading, mostrar result
+        dashboard.els.aiEmpty.classList.add('hidden');
+        dashboard.els.aiLoading.classList.add('hidden');
+        dashboard.els.aiResult.classList.remove('hidden');
+
+        if (!card) {
+            dashboard.els.aiBadge.textContent = `Segmento #${clusterId}`;
+            dashboard.els.aiTitle.textContent = `Segmento #${clusterId}`;
+            dashboard.els.aiSize.textContent = '';
+            dashboard.els.aiBullets.innerHTML = '';
+            return;
+        }
+
+        const useNaturalNames = document.getElementById('toggle-names')?.checked ?? true;
+        const name = useNaturalNames ? (card.name || `Segmento #${clusterId}`) : `Segmento #${clusterId}`;
+        const m = card.metrics || {};
+        const adr = m.adr != null ? `€${parseFloat(m.adr).toFixed(0)}` : 'N/A';
+        const leadtime = m.booking_leadtime != null ? `${Math.round(m.booking_leadtime)} días` : 'N/A';
+
+        dashboard.els.aiBadge.textContent = `Segmento #${clusterId}`;
+        dashboard.els.aiTitle.textContent = name;
+        dashboard.els.aiSize.textContent = `${card.size || 0} viajeros`;
+        dashboard.els.btnExport.dataset.clusterId = clusterId;
+
+        // 2 líneas estáticas del profiler — sin red, sin /explain
+        const ul = dashboard.els.aiBullets;
+        ul.innerHTML = '';
+        [`💶 ADR medio: ${adr}`, `📅 Antelación media de reserva: ${leadtime}`].forEach(text => {
+            const li = document.createElement('li');
+            li.textContent = text;
+            ul.appendChild(li);
+        });
     }
 };

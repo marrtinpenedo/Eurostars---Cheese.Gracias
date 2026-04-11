@@ -317,21 +317,28 @@ async function handleClusterClick(clusterId) {
     window.stayprintState.selectedCluster = clusterId;
     window.syncAffinityUI();
 
-    dashboard.showAILoading();
+    // Módulo 4: Vista 1 muestra solo resumen estático — sin llamar a /explain
+    dashboard.showClusterSummary(clusterId);
+}
+
+// Función de explicabilidad completa — DESCONECTADA de Vista 1.
+// Reservada para Vista 2 (Módulo 5). No eliminar.
+async function callExplainCluster(clusterId, hotelName) {
     try {
-        const hotelName = window.stayprintState.activeHotels.length > 0 ? window.stayprintState.activeHotels.map(h=>h.name).join(' + ') : null;
         const result = await stayprintAPI.explainCluster(clusterId, hotelName);
-        dashboard.showAIResult(result, hotelName);
+        return result;
     } catch (e) {
-        console.error(e);
-        dashboard.showAIResult({
+        console.error('callExplainCluster error:', e);
+        return {
             cluster_id: clusterId,
-            cluster_name: "Error",
+            cluster_name: `Segmento #${clusterId}`,
             cluster_size: 0,
-            bullets: ["No se pudo obtener la explicación del servidor."]
-        });
+            bullets: ['No se pudo obtener la explicación del servidor.']
+        };
     }
 }
+// Exportar para uso en Vista 2 (Módulo 5)
+window._callExplainCluster = callExplainCluster;
 
 function handleExportCSV(clusterId) {
     if(!clusterId) return;
