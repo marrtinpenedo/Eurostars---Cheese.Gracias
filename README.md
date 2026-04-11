@@ -18,12 +18,15 @@ Sigue estos pasos para arrancar el entorno de Inteligencia Artificial (Backend y
    make install
    ```
 
-2. **Configurar Entorno**
-   Copia el archivo de prueba y añade tus credenciales de Google Cloud para habilitar el motor de explicabilidad en lenguaje natural Vertex AI.
+2. **Configurar Entorno (Vertex AI / Google Gemini)**
+   El sistema de explicabilidad ha sido migrado a `google-genai`. Copia el archivo de plantilla y configura tus credenciales:
    ```bash
    cp .env.example .env
-   # Edita .env con nano o vim para agregar GOOGLE_API_KEY, VERTEX_MODEL, etc.
    ```
+   Edita `.env` con tu editor preferido (nano, vim) y asegúrate de configurar al menos:
+   - `GOOGLE_API_KEY=tu_clave_de_google_ai_studio` (o credenciales de Vertex)
+   - `VERTEX_MODEL=gemini-2.5-flash-lite` (por defecto, para mejor balance velocidad/calidad)
+   - `GOOGLE_CLOUD_PROJECT` y `VERTEX_LOCATION` si aplicasen a tu proyecto enterprise.
 
 3. **Arrancar el Servidor**
    ```bash

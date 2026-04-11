@@ -1,6 +1,6 @@
 # 📘 STAYPRINT — Documentación Técnica de Arquitectura y Decisiones
 
-**STAYPRINT** ("No te conocemos por tu perfil, sino por tu historia") es una plataforma analítica inteligente diseñada para Eurostars Hotel Company. Su objetivo es la segmentación de clientes empleando Topología de Datos (UMAP + HDBSCAN), proyecciones vectoriales inversas y modelos fundacionales (Groq Llama 3) para la explicabilidad de IA.
+**STAYPRINT** ("No te conocemos por tu perfil, sino por tu historia") es una plataforma analítica inteligente diseñada para Eurostars Hotel Company. Su objetivo es la segmentación de clientes empleando Topología de Datos (UMAP + HDBSCAN), proyecciones vectoriales inversas y modelos fundacionales (Vertex AI / Gemini) para la explicabilidad de IA.
 
 ---
 
@@ -55,18 +55,18 @@ El "Proyector Inverso" es el mayor elemento disruptivo de STAYPRINT.
 
 ## 🤖 4. Explicabilidad Generativa (Explainable AI - XAI)
 
-Se ha integrado a **Groq (con el LLM Llama-3.3-70b-versatile)** a través de una API proxy compatible con el SDK puro de OpenAI.
+Se ha integrado **Vertex AI (con el LLM Gemini 2.5 Flash)** a través del SDK oficial `google-genai`.
 
 - **Generador de Semántica (Módulo Naming):** En lugar de "Cluster #6", el LLM absorbe el CSV de estadísticas frías de ese segmento y computa analíticamente un string poético pero fiero, como "*Viajero Joven de Playa Low-Cost*". Esto se cruza con las restricciones anti-colisión para nombres únicos desarrolladas en Python.
-- **Desglose Descriptivo de Campañas:** Al tocar un nodo, en vez de mandar una métrica de Excel a marketing, el sistema envía un Payload a Groq donde "el Rol del Agente" es traducir ese perfil en "Bullets ultra-vendibles para Marketing y Ventas".
-- **Por qué Groq / Llama-3.3?:** En iteraciones pasadas se usaba GPT-4o-Mini, pero Llama 3.3 ofrecía respuestas a velocidades inferenciales formidables (Tokens a velocidades ultrarrápidas). Era un requerimiento indispensable que cuando el humano toque una esfera en la interfaz espacial, el resumen de la IA caiga casi instantáneo sin bloquear su imaginación. Cuidando que las llaves API nunca queden expuestas en cliente gracias a un Wrapper asíncrono en `clustering/explainer.py`. 
+- **Desglose Descriptivo de Campañas:** Al tocar un nodo, en vez de mandar una métrica de Excel a marketing, el sistema envía un Payload a Gemini donde "el system instruction" dirige la traducción de ese perfil en "Bullets ultra-vendibles para Marketing y Ventas".
+- **Por qué Vertex AI / Gemini 2.5?:** Las respuestas debían ser a velocidades inferenciales formidables (Tokens a velocidades ultrarrápidas). Gemini Flash es imbatible en relación velocidad/precisión. Era un requerimiento indispensable que cuando el humano toque una esfera en la interfaz espacial, el resumen de la IA caiga casi instantáneo sin bloquear su imaginación. El balance ideal se asegura configurando al cliente en `clustering/explainer.py`. 
 
 ---
 
 ## 💾 5. Gestión del Estado, Caché y Rendimiento
 
 La arquitectura de la aplicación en vivo toma resoluciones que priorizan la fluidez:
-1. **Caché en Nivel Backend Asíncrona:** Cuando generamos una abstracción con OpenAI para un segmento o una intersección entre 3 Hoteles + X Cluster, ese llamado HTTP no se vuelve a tirar. FastAPI guarda un diccionario vivo con el `cache_key`.
+1. **Caché en Nivel Backend Asíncrona:** Cuando generamos una abstracción con Gemini AI para un segmento o una intersección entre 3 Hoteles + X Cluster, ese llamado HTTP no se vuelve a tirar. FastAPI guarda un diccionario vivo con el `cache_key`.
 2. **Descarga de Datos Responsable (Export):** El botón CSV procesa la exportación basándose en cruces de identificadores internos de Pandas desde el vector base original prevencionando corrupciones o manipulación cruzada de PII de GUEST_IDs.
 
 ---
