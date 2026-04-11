@@ -19,15 +19,21 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '..', '.en
 
 def get_genai_client() -> genai.Client:
     """
-    Inicializa el cliente de Google GenAI leyendo la key del entorno.
+    Inicializa el cliente de Google GenAI usando preferentemente Vertex AI (ADC).
     """
+    project = os.getenv("GOOGLE_CLOUD_PROJECT")
+    location = os.getenv("VERTEX_LOCATION", "us-central1")
     api_key = os.getenv("GOOGLE_API_KEY")
-    if not api_key:
+    
+    if project:
+        return genai.Client(vertexai=True, project=project, location=location)
+    elif api_key:
+        return genai.Client(api_key=api_key)
+    else:
         raise RuntimeError(
-            "GOOGLE_API_KEY no encontrada. "
-            "Asegúrate de que existe un fichero .env con GOOGLE_API_KEY=your_key..."
+            "Faltan credenciales. Configura GOOGLE_CLOUD_PROJECT para Vertex AI (y haz 'gcloud auth application-default login') "
+            "o define GOOGLE_API_KEY en tu fichero .env si usas AI Studio."
         )
-    return genai.Client(api_key=api_key)
 
 logger = logging.getLogger(__name__)
 
