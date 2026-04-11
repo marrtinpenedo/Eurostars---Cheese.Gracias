@@ -22,18 +22,27 @@ async function init() {
         handleExportCSV
     );
 
-    // Cargar hoteles en dropdown
-    try {
-        const hotels = await stayprintAPI.getHotelsCatalog();
-        dashboard.populateHotels(hotels);
-    } catch (e) {
-        console.error("No se pudo cargar el listado de hoteles", e);
-    }
+    // Cargar hoteles en dropdown si ya están subidos
+    await loadHotels();
 
     // Botón de ejecución global
     document.getElementById('btn-upload').addEventListener('click', runPipeline);
     
     initFileUploads();
+}
+
+async function loadHotels() {
+    try {
+        const hotels = await stayprintAPI.getHotelsCatalog();
+        if (!hotels || hotels.length === 0) {
+            dashboard.els.hotelDropdown.innerHTML = '<option value="">No hay hoteles disponibles</option>';
+            return;
+        }
+        dashboard.populateHotels(hotels);
+    } catch (e) {
+        console.error("Error cargando hoteles:", e);
+        dashboard.els.hotelDropdown.innerHTML = '<option value="">Error al cargar hoteles</option>';
+    }
 }
 
 function initFileUploads() {
@@ -83,6 +92,8 @@ async function runPipeline() {
         }
 
         await runRecluster(initialSize);
+        // FIX 1 Causa C: Recargar hoteles después de procesar el pipeline
+        await loadHotels();
     } catch (e) {
         console.error(e);
         alert("Error ejecutando pipeline inicial: " + e.message);

@@ -178,12 +178,15 @@ export const dashboard = {
         dashboard.els.aiResult.classList.remove('hidden');
 
         dashboard.els.aiBadge.textContent = `Segmento #${resultData.cluster_id}`;
-        dashboard.els.aiTitle.textContent = resultData.cluster_name;
+        
+        const useNaturalNames = document.getElementById('toggle-names')?.checked ?? true;
+        dashboard.els.aiTitle.textContent = useNaturalNames ? resultData.cluster_name : `Segmento #${resultData.cluster_id}`;
+        
         dashboard.els.aiSize.textContent = `${resultData.cluster_size} viajeros`;
         
         dashboard.els.btnExport.dataset.clusterId = resultData.cluster_id;
 
-        if (selectedHotelName) {
+        if (selectedHotelName && selectedHotelName.trim() !== '' && selectedHotelName !== 'null' && selectedHotelName !== 'undefined') {
             dashboard.els.aiContextBanner.classList.remove('hidden');
             dashboard.els.aiContextHotel.textContent = selectedHotelName;
         } else {

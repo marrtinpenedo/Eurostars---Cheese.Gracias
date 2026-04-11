@@ -79,21 +79,23 @@ def extract_dominant_features(cluster_id: int, cluster_profiles: list, global_st
         
     return diffs
 
-def generate_cluster_explanation(dominant_features: dict, cluster_size: int, hotel_name: Optional[str] = None) -> list[str]:
+def generate_cluster_explanation(dominant_features: dict, cluster_size: int, cluster_name: str, hotel_name: Optional[str] = None) -> list[str]:
     """
     Llama a OpenAI gpt-4o-mini con los atributos dominantes del cluster
-    y devuelve bullet points en lenguaje natural y nombre del cluster.
+    y devuelve bullet points en lenguaje natural.
     """
     try:
         client = get_openai_client()
         
-        hotel_context = f"\\nEste segmento ha sido identificado como altamente afín y predispuesto a reservar en el hotel: {hotel_name}." if hotel_name else ""
-        user_prompt = f"""Describe creativamente a este segmento de clientes en bullet points.{hotel_context}
+        hotel_context = f"\nEste segmento ha sido identificado como afín al hotel {hotel_name}." if hotel_name else ""
+        user_prompt = f"""Describe el segmento llamado "{cluster_name}" ({cluster_size} clientes) en bullet points.{hotel_context}
 
-Datos del segmento ({cluster_size} clientes, sus desvíos vs media):
+Datos:
 {json.dumps(dominant_features, indent=2, ensure_ascii=False)}
 
-Devuelve estrictamente un array JSON plano de strings. El PRIMER elemento debe ser un Título creativo para el cluster (ej: "🚀 Viajero Urbano Premium"), los siguientes hasta 5 elementos serán los bullets puros donde cada uno empieza con un emoji relevante, sin tecnicismos y muy vendedor para marketing."""
+IMPORTANTE: El nombre del segmento es "{cluster_name}". 
+Tu descripción debe ser coherente con ese nombre.
+Devuelve solo una lista JSON de strings."""
 
         response = client.chat.completions.create(
             model=os.environ.get("OPENAI_MODEL", "llama-3.3-70b-versatile"),
@@ -129,14 +131,10 @@ def get_full_explanation(
     """
     c_data = next((c for c in cluster_profiles if c["cluster_id"] == cluster_id), {})
     size = c_data.get("size", 0)
-    rule_based_name = c_data.get("name", f"Segmento #{cluster_id}")
+    cluster_name = c_data.get("name", f"Segmento #{cluster_id}")
     
     dominant_features = extract_dominant_features(cluster_id, cluster_profiles, global_stats)
-    bullets = generate_cluster_explanation(dominant_features, size, hotel_name)
-    
-    cluster_name = rule_based_name
-    if bullets and not str(bullets[0]).startswith("⚠️") and not str(bullets[0]).startswith("Reemplaza"):
-        cluster_name = bullets.pop(0)
+    bullets = generate_cluster_explanation(dominant_features, size, cluster_name, hotel_name)
     
     if not bullets:
         bullets = ["Sin descripción detallada. (OpenAI inactivo)"]

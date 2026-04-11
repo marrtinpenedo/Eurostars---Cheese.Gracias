@@ -76,11 +76,15 @@ def explain_cluster(cluster_id: int, req: ExplainRequest, request: Request):
     if not cards or not global_stats:
         raise HTTPException(status_code=400, detail="Debes analizar (recluster) primero para extraer los segmentos.")
         
+    hotel_name = req.hotel_name
+    if not hotel_name or hotel_name.strip() == "" or hotel_name.lower() == "null" or hotel_name.lower() == "undefined":
+        hotel_name = None
+
     # Inicializar caché en el estado si no existe
     if not hasattr(request.app.state, "explanations_cache"):
         request.app.state.explanations_cache = {}
         
-    cache_key = (cluster_id, req.hotel_name)
+    cache_key = (cluster_id, hotel_name)
     if cache_key in request.app.state.explanations_cache:
         return request.app.state.explanations_cache[cache_key]
         
@@ -89,7 +93,7 @@ def explain_cluster(cluster_id: int, req: ExplainRequest, request: Request):
         cluster_id=cluster_id,
         cluster_profiles=cards,
         global_stats=global_stats,
-        hotel_name=req.hotel_name
+        hotel_name=hotel_name
     )
     
     # Guardar en caché

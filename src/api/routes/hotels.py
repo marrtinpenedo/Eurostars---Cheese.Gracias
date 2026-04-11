@@ -97,29 +97,38 @@ def project_hotel(req: HotelProjectRequest, app_req: Request):
         "interpretation": interpretation
     }
 
-from src.data.loader import load_hotel_data
+from src.data.loader import DataLoader
 
 @router.get("/hotels")
 def get_all_hotels():
     """
     Devuelve TODOS los hoteles del hotel_data.csv sin filtros ni límites.
     """
-    hotel_df = load_hotel_data()
+    try:
+        loader = DataLoader()
+        hotel_df = loader.load_hotels()
+        if hotel_df is None or hotel_df.empty:
+            raise HTTPException(status_code=500, detail="hotel_data.csv no cargado. Sube el fichero primero.")
+        
+        hotels = []
+        for _, row in hotel_df.iterrows():
+            hotels.append({
+                "id": str(row.get("ID", "")).strip().zfill(3),
+                "name": str(row.get("HOTEL_NAME", "")),
+                "city": str(row.get("CITY_NAME", "")),
+                "country": str(row.get("COUNTRY_ID", "")),
+                "stars": int(row.get("STARS", 3)),
+                "brand": str(row.get("BRAND", "")),
+                "beach": 1.0 if str(row.get("CITY_BEACH_FLAG", "")).upper() == "YES" else 0.0,
+                "mountain": 1.0 if str(row.get("CITY_MOUNTAIN_FLAG", "")).upper() == "YES" else 0.0,
+                "heritage": 1.0 if str(row.get("CITY_HISTORICAL_HERITAGE", "")).upper() == "HIGH" else 0.0,
+                "gastronomy": 1.0 if str(row.get("CITY_GASTRONOMY", "")).upper() == "HIGH" else 0.0,
+                "price_level": 1.0 if str(row.get("CITY_PRICE_LEVEL", "")).upper() == "HIGH" else 0.0,
+            })
+        
+        return {"hotels": hotels, "total": len(hotels)}
     
-    hotels = []
-    for _, row in hotel_df.iterrows():
-        hotels.append({
-            "id": str(row.get("ID", "")).strip().zfill(3),
-            "name": row.get("HOTEL_NAME", ""),
-            "city": row.get("CITY_NAME", ""),
-            "country": row.get("COUNTRY_ID", ""),
-            "stars": int(row.get("STARS", 0)),
-            "brand": row.get("BRAND", ""),
-            "beach": float(row.get("CITY_BEACH_FLAG", 0)),
-            "mountain": float(row.get("CITY_MOUNTAIN_FLAG", 0)),
-            "heritage": float(row.get("CITY_HISTORICAL_HERITAGE", 0)),
-            "gastronomy": float(row.get("CITY_GASTRONOMY", 0)),
-            "price_level": float(row.get("CITY_PRICE_LEVEL", 0)),
-        })
-    
-    return {"hotels": hotels, "total": len(hotels)}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error cargando hoteles: {str(e)}")
