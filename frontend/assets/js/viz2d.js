@@ -132,8 +132,7 @@ export const viz2d = {
 
         // --- RENDER ACTVE HOTELS ---
         if (hasHotels) {
-            activeHotels.forEach((hotel, idx) => {
-                // Posicionar en el centro de gravedad (baricentro ponderado por tamaño de las esferas afines asociadas)
+            const hPoints = activeHotels.map((hotel, idx) => {
                 const affinesForHotel = clusterCards.filter(c => affineSet.has(c.cluster_id));
                 let hx = width / 2;
                 let hy = height / 2;
@@ -143,37 +142,70 @@ export const viz2d = {
                     hx = d3.sum(affinesForHotel, c => xScale(c.centroid_2d[0]) * c.size) / totalSize;
                     hy = d3.sum(affinesForHotel, c => yScale(c.centroid_2d[1]) * c.size) / totalSize;
                 }
+                return { hotel, idx, hx, hy };
+            });
 
-                const gHotel = svg.append("g")
-                    .attr("transform", `translate(${hx}, ${hy})`)
-                    .style("cursor", "crosshair")
-                    .on("mouseover", () => {
-                        tooltip.html(`<b>🏨 ${hotel.name}</b><br>Posición afín ponderada`)
-                            .style("visibility", "visible");
-                    })
-                    .on("mousemove", (event) => {
-                        tooltip.style("top", (event.pageY + 15) + "px").style("left", (event.pageX + 15) + "px");
-                    })
-                    .on("mouseout", () => tooltip.style("visibility", "hidden"));
+            const groups = [];
+            hPoints.forEach(pt => {
+                let g = groups.find(g => Math.abs(g.hx - pt.hx) < 0.01 && Math.abs(g.hy - pt.hy) < 0.01);
+                if (!g) {
+                    g = { hx: pt.hx, hy: pt.hy, items: [] };
+                    groups.push(g);
+                }
+                g.items.push(pt);
+            });
 
-                // Símbolo diamante (Eurostars)
-                const symbol = d3.symbol().type(d3.symbolDiamond).size(450);
-                gHotel.append("path")
-                    .attr("d", symbol)
-                    .attr("fill", HOTEL_COLORS[idx] || '#1A1D23')
-                    .attr("stroke", "#ffffff")
-                    .attr("stroke-width", 2)
-                    .style("filter", "drop-shadow(0px 4px 6px rgba(0,0,0,0.4))");
+            groups.forEach(g => {
+                const N = g.items.length;
+                g.items.forEach((pt, i) => {
+                    let finalX = pt.hx;
+                    let finalY = pt.hy;
+                    
+                    if (N > 1) {
+                        const angle = (2 * Math.PI / N) * i;
+                        finalX += Math.cos(angle) * 18;
+                        finalY += Math.sin(angle) * 18;
+                    }
 
-                gHotel.append("text")
-                    .attr("y", -20)
-                    .attr("text-anchor", "middle")
-                    .style("font-size", "14px")
-                    .style("font-weight", "bold")
-                    .style("fill", "#1A1D23")
-                    .style("pointer-events", "none")
-                    .style("text-shadow", "0px 0px 4px white, 0px 0px 8px white")
-                    .text(hotel.name);
+                    const gHotel = svg.append("g")
+                        .attr("transform", `translate(${finalX}, ${finalY})`)
+                        .style("cursor", "crosshair")
+                        .on("mouseover", () => {
+                            tooltip.html(`<b>🏨 ${pt.hotel.name}</b><br>Posición afín ponderada`)
+                                .style("visibility", "visible");
+                        })
+                        .on("mousemove", (event) => {
+                            tooltip.style("top", (event.pageY + 15) + "px").style("left", (event.pageX + 15) + "px");
+                        })
+                        .on("mouseout", () => tooltip.style("visibility", "hidden"));
+
+                    // Símbolo diamante (Eurostars)
+                    const symbol = d3.symbol().type(d3.symbolDiamond).size(450);
+                    gHotel.append("path")
+                        .attr("d", symbol)
+                        .attr("fill", HOTEL_COLORS[pt.idx] || '#1A1D23')
+                        .attr("stroke", "#ffffff")
+                        .attr("stroke-width", 2)
+                        .style("filter", "drop-shadow(0px 4px 6px rgba(0,0,0,0.4))");
+
+                    let textY = -20;
+                    if (N > 1) {
+                        // Spread vertical armónico centrado en -20px original (20px de salto)
+                        const totalSpread = (N - 1) * 20; 
+                        const startY = -20 - (totalSpread / 2);
+                        textY = startY + (i * 20);
+                    }
+
+                    gHotel.append("text")
+                        .attr("y", textY)
+                        .attr("text-anchor", "middle")
+                        .style("font-size", "14px")
+                        .style("font-weight", "bold")
+                        .style("fill", "#1A1D23")
+                        .style("pointer-events", "none")
+                        .style("text-shadow", "0px 0px 4px white, 0px 0px 8px white")
+                        .text(pt.hotel.name);
+                });
             });
         }
     }
