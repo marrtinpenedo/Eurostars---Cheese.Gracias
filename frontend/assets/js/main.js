@@ -6,10 +6,55 @@ import { stayprintAPI } from './api.js';
 import { viz3d } from './viz3d.js';
 import { dashboard } from './dashboard.js';
 
-let appState = {
+
+window.stayprintState = {
+    ...(window.stayprintState || {}),
     numClusters: 0,
-    activeHotels: [] // List of {id, name}
+    activeHotels: [],
+    affineClusters: new Set(),
+    selectedCluster: null
 };
+
+window.syncAffinityUI = function() {
+    const hasHotels = window.stayprintState.activeHotels.length > 0;
+    const affineClusters = window.stayprintState.affineClusters;
+
+    // --- Cards de segmentos ---
+    document.querySelectorAll('[data-cluster-id]').forEach(card => {
+        const cid = parseInt(card.dataset.clusterId);
+        const badge = card.querySelector('.affinity-badge');
+        if (!badge) return;
+
+        if (!hasHotels || !affineClusters.has(cid)) {
+            badge.style.display = 'none';
+            badge.textContent = '';
+        } else {
+            badge.style.display = 'inline-flex';
+            const names = window.stayprintState.activeHotels.map(h => h.name).join(' + ');
+            badge.textContent = `Afín a ${names}`;
+        }
+    });
+
+    // --- Panel lateral ---
+    const sideBadge = document.getElementById('side-affinity-badge');
+    if (sideBadge) {
+        const selCid = window.stayprintState.selectedCluster;
+        const isAffine = selCid !== null && hasHotels && affineClusters.has(selCid);
+        sideBadge.style.display = isAffine ? 'block' : 'none';
+        if (isAffine) {
+            const names = window.stayprintState.activeHotels.map(h => h.name).join(' + ');
+            sideBadge.textContent = `Afín a ${names}`;
+        }
+    }
+}
+
+function onHotelProjected(responseData) {
+    window.stayprintState.affineClusters = new Set(
+        (responseData.affine_clusters || []).map(c => c.cluster_id)
+    );
+    window.syncAffinityUI();
+}
+
 
 async function init() {
     console.log("Stayprint Init");
@@ -105,9 +150,9 @@ async function runRecluster(minSize) {
     viz3d.initPlot();
     try {
         const reclusterData = await stayprintAPI.recluster(minSize);
-        appState.numClusters = reclusterData.n_clusters;
-        appState.activeHotels = []; // reset projection
-        dashboard.renderActiveHotels(appState.activeHotels);
+        window.stayprintState.numClusters = reclusterData.n_clusters;
+        window.stayprintState.activeHotels = []; // reset projection
+        dashboard.renderActiveHotels(window.stayprintState.activeHotels);
         
         dashboard.updateGlobalStats(reclusterData);
         
@@ -125,28 +170,29 @@ async function runRecluster(minSize) {
 }
 
 async function handleSliderChange(val) {
-    if(appState.numClusters > 0) {
+    if(window.stayprintState.numClusters > 0) {
         await runRecluster(parseInt(val));
     }
 }
 
 async function updateHotelProjection() {
-    dashboard.renderActiveHotels(appState.activeHotels);
+    dashboard.renderActiveHotels(window.stayprintState.activeHotels);
     
-    if (appState.activeHotels.length === 0) {
+    if (window.stayprintState.activeHotels.length === 0) {
         if(viz3d.currentData) {
-            viz3d.render(viz3d.currentData, appState.numClusters, null, handleClusterClick);
+            viz3d.render(viz3d.currentData, window.stayprintState.numClusters, null, handleClusterClick);
         }
         return;
     }
     
     viz3d.initPlot();
     try {
-        const hotelIds = appState.activeHotels.map(h => h.id);
+        const hotelIds = window.stayprintState.activeHotels.map(h => h.id);
         const projData = await stayprintAPI.projectHotel(hotelIds);
+        onHotelProjected(projData);
         
         if(viz3d.currentData) {
-            viz3d.render(viz3d.currentData, appState.numClusters, projData, handleClusterClick);
+            viz3d.render(viz3d.currentData, window.stayprintState.numClusters, projData, handleClusterClick);
         } else {
             document.getElementById('loader-3d').classList.add('hidden');
         }
@@ -158,24 +204,36 @@ async function updateHotelProjection() {
 }
 
 async function handleProjectHotel(hotelId, hotelName) {
-    if (appState.activeHotels.find(h => h.id === hotelId)) return; // duplicados
-    if (appState.activeHotels.length >= 3) {
+    if (window.stayprintState.activeHotels.find(h => h.id === hotelId)) return; // duplicados
+    if (window.stayprintState.activeHotels.length >= 3) {
         alert("Máximo 3 hoteles simultáneos");
         return;
     }
-    appState.activeHotels.push({ id: hotelId, name: hotelName });
+    window.stayprintState.activeHotels.push({ id: hotelId, name: hotelName });
     await updateHotelProjection();
 }
 
 async function handleRemoveHotel(hotelId) {
-    appState.activeHotels = appState.activeHotels.filter(h => h.id !== hotelId);
-    await updateHotelProjection();
+    window.stayprintState.activeHotels = 
+        window.stayprintState.activeHotels.filter(h => h.id !== hotelId);
+    
+    if (window.stayprintState.activeHotels.length === 0) {
+        window.stayprintState.affineClusters = new Set(); // limpiar todo
+        viz3d.clearScatterSelection(); // As a stand-in for clearHotelMarkersFromScatter
+        updateHotelProjection(); // Need to recalculate without hotels to rerender scatter normally
+    } else {
+        await updateHotelProjection();
+    }
+    window.syncAffinityUI();
 }
 
 async function handleClusterClick(clusterId) {
+    window.stayprintState.selectedCluster = clusterId;
+    window.syncAffinityUI();
+
     dashboard.showAILoading();
     try {
-        const hotelName = appState.activeHotels.length > 0 ? appState.activeHotels.map(h=>h.name).join(' + ') : null;
+        const hotelName = window.stayprintState.activeHotels.length > 0 ? window.stayprintState.activeHotels.map(h=>h.name).join(' + ') : null;
         const result = await stayprintAPI.explainCluster(clusterId, hotelName);
         dashboard.showAIResult(result, hotelName);
     } catch (e) {

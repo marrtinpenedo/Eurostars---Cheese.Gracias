@@ -147,6 +147,7 @@ export const dashboard = {
         cards.forEach(card => {
             const div = document.createElement('div');
             div.className = 'segment-card';
+            div.dataset.clusterId = card.cluster_id;
             
             const titleStr = useNaturalNames ? (card.name || 'Segmento ' + card.cluster_id) : `Segmento #${card.cluster_id}`;
             const adrVal = card.metrics ? card.metrics.adr : (card.adr_mean || 0);
@@ -156,10 +157,13 @@ export const dashboard = {
                     <span class="card-color-indicator" style="background:${colors[card.cluster_id % colors.length]}"></span>
                     <span class="badge">#${card.cluster_id}</span>
                 </div>
-                <h4 class="card-title" title="${titleStr}">${titleStr}</h4>
+                <h4 class="card-title" title="${titleStr}">
+                    ${titleStr}
+                    <span class="affinity-badge" style="display:none; margin-left: 6px; font-size: 11px; font-weight: 600; color: #166534; background: #DCFCE7; padding: 2px 6px; border-radius: 9999px;"></span>
+                </h4>
                 <div class="card-stats">
                     <span title="Tamaño del segmento">👥 ${card.size}</span>
-                    <span title="ADR (Average Daily Rate): Gasto promedio diario estimado">💶 €${parseFloat(adrVal).toFixed(0)}</span>
+                    <span title="ADR">💶 €${parseFloat(adrVal).toFixed(0)}</span>
                 </div>
             `;
             div.addEventListener('click', () => onCardClick(card.cluster_id));
@@ -186,12 +190,7 @@ export const dashboard = {
         
         dashboard.els.btnExport.dataset.clusterId = resultData.cluster_id;
 
-        if (selectedHotelName && selectedHotelName.trim() !== '' && selectedHotelName !== 'null' && selectedHotelName !== 'undefined') {
-            dashboard.els.aiContextBanner.classList.remove('hidden');
-            dashboard.els.aiContextHotel.textContent = selectedHotelName;
-        } else {
-            dashboard.els.aiContextBanner.classList.add('hidden');
-        }
+        // Old affinity logic removed. Global syncAffinityUI handles sideBadge now.
 
         const ul = dashboard.els.aiBullets;
         ul.innerHTML = '';
