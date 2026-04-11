@@ -1,6 +1,7 @@
 """FastAPI app principal. Punto de entrada de la API web."""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import logging
 from dotenv import load_dotenv
@@ -52,6 +53,5 @@ app.include_router(pipeline.router, prefix="/api/pipeline", tags=["Pipeline"])
 app.include_router(clusters.router, prefix="/api/clusters", tags=["Clusters"])
 app.include_router(hotels.router, prefix="/api/hotels", tags=["Hotels"])
 
-@app.get("/")
-def root():
-    return {"status": "STAYPRINT Engine Online"}
+# Static Files (Frontend)
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")

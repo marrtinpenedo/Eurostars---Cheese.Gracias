@@ -3,19 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STAYPRINT - Eurostars</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <title>STAYPRINT | Eurostars Analytics</title>
+    
+    <!-- Google Fonts: Oufit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/assets/css/style.css">
+    
     <!-- Plotly -->
     <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
 </head>
 <body>
     <div id="app">
-        <h1>STAYPRINT</h1>
-        <p>No te conocemos por tu perfil, sino por tu historia.</p>
-        <div id="3d-plot"></div>
+        <!-- TOP NAVBAR -->
+        <header class="glass-navbar">
+            <div class="logo">
+                <h1>STAYPRINT</h1>
+                <span>Eurostars Hotel Company</span>
+            </div>
+            
+            <div class="nav-actions">
+                <button id="btn-demo-data" class="btn btn-outline" style="display:none">Cargar Demo</button>
+                <div class="file-upload">
+                    <label for="customers_csv">Clientes CSV:</label>
+                    <input type="file" id="customers_csv" accept=".csv">
+                </div>
+                <div class="file-upload">
+                    <label for="hotels_csv">Hoteles CSV:</label>
+                    <input type="file" id="hotels_csv" accept=".csv">
+                </div>
+                <button id="btn-upload" class="btn">Procesar Nube Geodésica</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- CONTROLES IZQUIERDOS -->
+            <aside class="sidebar-left glass-panel">
+                <h2>Control de Inmersión</h2>
+                <div class="control-group tooltip-container">
+                    <label for="cluster-slider">
+                        Granularidad de Segmentos
+                        <span id="optimal-badge" class="badge">Sugerido: 5 ⭐</span>
+                    </label>
+                    <input type="range" id="cluster-slider" min="3" max="30" value="5" step="1">
+                    <div class="slider-val">Densidad mínima: <span id="slider-val-display">5</span></div>
+                </div>
+                
+                <hr>
+                
+                <h2>Proyector Inverso</h2>
+                <p class="subtitle">Descubre a quién impactar proyectando un hotel al espacio vectorial.</p>
+                <div class="control-group">
+                    <label for="hotel-dropdown">Matchmaker (Eurostars)</label>
+                    <select id="hotel-dropdown">
+                        <option value="">Cargando catálogo...</option>
+                    </select>
+                </div>
+                
+                <button id="btn-project" class="btn btn-gradient disabled" disabled>Proyectar Hotel al Espacio 3D</button>
+
+                <div id="global-stats-panel" class="stats-panel mt-3">
+                    <!-- Rellenaremos N Clusters y Silhouette Score dinámicamente -->
+                    <div class="stat-box">
+                        <span class="stat-title">Nº Clústeres</span>
+                        <span class="stat-value" id="stat-n-clusters">-</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- ESPACIO CENTRAL PLOTLY -->
+            <section class="canvas-container">
+                <div id="loader-3d" class="loader-overlay hidden">
+                    <div class="spinner"></div>
+                    <p>Calculando topología UMAP y aglutinando densidades...</p>
+                </div>
+                <div id="plot3d"></div>
+            </section>
+
+            <!-- EXPLICADOR DERECHO -->
+            <aside class="sidebar-right glass-panel">
+                <!-- ... existing content ... -->
+                <div id="ai-panel">
+                    <!-- Empty State -->
+                    <div id="ai-empty" class="state-view">
+                        <div class="icon-pulse">✦</div>
+                        <h3>Módulo de Explicabilidad</h3>
+                        <p>Haz clic en cualquier segmento del espacio estelar para generar su expediente de marketing en tiempo real mediante OpenAI.</p>
+                    </div>
+
+                    <!-- Loader Skeleton -->
+                    <div id="ai-loading" class="state-view hidden">
+                        <div class="skeleton-title"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line w-80"></div>
+                        <div class="skeleton-line"></div>
+                    </div>
+
+                    <!-- Result Panel -->
+                    <div id="ai-result" class="state-view hidden">
+                        <header class="ai-header">
+                            <span class="cluster-id-badge" id="ai-id-badge">Segmento #X</span>
+                            <h2 id="ai-title">Título Generado</h2>
+                            <span class="metrics-chip" id="ai-size-chip">0 viaj.</span>
+                        </header>
+                        
+                        <div class="context-banner hidden" id="ai-context-banner">
+                            Afín al <b id="ai-context-hotel"></b>
+                        </div>
+
+                        <ul id="ai-bullets" class="bullet-list">
+                            <!-- JS inyectará Li items -->
+                        </ul>
+
+                        <div class="action-footer">
+                            <button id="btn-export-csv" class="btn btn-outline full-width">Exportar Segmento a Hubspot (CSV)</button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+        
+        <!-- CARDS DE SEGMENTOS -->
+        <section id="segment-cards-container" class="cards-container hidden">
+            <h3 class="cards-title">Campañas Recomendadas</h3>
+            <div id="cards-scroller" class="cards-scroller">
+                <!-- JS inyectará cards -->
+            </div>
+        </section>
     </div>
-    <script src="assets/js/main.js"></script>
-    <script src="assets/js/viz3d.js"></script>
-    <script src="assets/js/dashboard.js"></script>
+
+    <!-- Modulos JS -->
+    <script type="module" src="/assets/js/main.js"></script>
 </body>
 </html>
