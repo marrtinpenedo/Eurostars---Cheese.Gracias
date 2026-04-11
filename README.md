@@ -5,24 +5,28 @@
 > *"No te conocemos por tu perfil, sino por tu historia."*
 
 STAYPRINT es una herramienta de segmentación de clientes hoteleros basada en embeddings e hiperpersonalización.
-Construye un vector de identidad de viaje a partir del comportamiento histórico y realiza matching con el catálogo de hoteles.
+Construye un vector de identidad de viaje a partir del comportamiento histórico y realiza matching predictivo con el catálogo de hoteles emparejando viajeros reales con destinos afines.
 
 ---
 
-## 🚀 Setup Rápido (3 Pasos)
+## 🚀 Setup Rápido (Entorno Aislado VENV)
 
-Sigue estos pasos para arrancar el entorno de Inteligencia Artificial (Backend y Frontend SPA incluidos).
+Sigue estos pasos para arrancar el entorno de Inteligencia Artificial (Backend y Frontend SPA incluidos). Recomendamos usar un entorno virtual (`venv`) para aislar el proyecto de tu sistema.
 
-1. **Instalar Dependencias**
+1. **Crear Entorno Virtual e Instalar Dependencias**
    ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # En Linux/Mac
+   # venv\Scripts\activate   # En Windows
+   
    make install
    ```
 
-2. **Configurar Entorno**
-   Copia el archivo de prueba y añade tu clave de OpenAI para habilitar el motor de explicabilidad en lenguaje natural.
+2. **Configurar Entorno (Inyectar LLM)**
+   Copia el archivo de prueba y añade tu clave de **Groq** para habilitar el motor ultra-rápido de explicabilidad en lenguaje natural (modelo *Llama-3.3-70b-versatile*).
    ```bash
    cp .env.example .env
-   # Edita .env con nano o vim para agregar OPENAI_API_KEY
+   # Edita .env con nano o vim para agregar tu GROQ_API_KEY
    ```
 
 3. **Arrancar el Servidor**
@@ -43,14 +47,14 @@ make demo
 
 ### Guion de Ensayo (Pitch)
 1. Abrir **http://localhost:8000**.
-2. Hacer click en **"Procesar Nube Geodésica"**. Se aglutinarán dinámicamente las densidades usando UMAP (70% del panel) y detectará clusters reales vía HDBSCAN.
-3. Observar las **Campañas Recomendadas** generadas en la galería inferior.
+2. Hacer click en **"Procesar Nube Geodésica"**. Se aglutinarán dinámicamente las densidades usando UMAP (70% del panel) y detectará clusters reales vía HDBSCAN explorando las matrices geodésicas.
+3. Observar las **Campañas Recomendadas** generadas en la galería inferior. Fíjate en los atractivos títulos creados por Llama-3.3 en vez de meros números fríos.
 4. **Momento WOW:** En la sección Izquierda, despliega el dropdown *Matchmaker (Eurostars)* y selecciona un hotel, por ejemplo **Eurostars Torre Sevilla**.
-5. Observa cómo el sistema automáticamente proyecta un nuevo vector, inyectando el hotel flotando en 3D (`🏨`) y destacando instantáneamente los nudos de clusters exactos que coinciden con ese hotel.
-6. **Explicabilidad Humana**: Haz clic en el cluster iluminado y verás como OpenAI narra la historia perfecta del *por qué* ese turista encaja en *ese* hotel de Sevilla.
-7. Explica a tu interlocutor por qué se recomiendan N campañas segmentadas, leyendo el score automático de Silhouette expuesto en el panel lateral.
+5. Observa cómo el sistema automáticamente proyecta un nuevo vector, inyectando el hotel flotando en 3D (`🏨`) y destacando instantáneamente los nudos exactos que coinciden con la infraestructura del hotel.
+6. **Explicabilidad Humana**: Haz clic en el cluster iluminado y verás como el agente LLM de **Groq** narra la historia perfecta del *por qué* ese segmento demográfico de turista encaja en *ese* hotel de Sevilla.
+7. Al finalizar, exporta ese subconjunto desde el botón lateral derecho ("Exportar segmento como CSV") y llévatelo directo para lanzarle una campaña de retargeting de email marketing.
 
 ---
 
 ### Seguridad de Datos Local
-Todo salvo la explicabilidad LLM se procesa localmente o *on-premise*. El export de las campañas sólo contiene los IDs universales del cliente (totalmente anónimo), listo para CRM.
+Todo el preprocesado estadístico salvo la interjección puntual con el LLM en Groq se procesa localmente (*on-premise*). El export de las campañas sólo extrae identificadores universales limpios (`GUEST_ID` anónimo), listos para integrarlos al entorno IT interno con total seguridad.
