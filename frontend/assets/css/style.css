@@ -649,6 +649,40 @@ select {
     cursor: not-allowed;
 }
 
+/* ─────────────────────────────────────────
+   MÓDULO 4 — Upload en sidebar derecho
+───────────────────────────────────────── */
+
+/* Variante sidebar: apilar botones en columna */
+.csv-upload-sidebar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 0;
+}
+
+.csv-upload-sidebar .upload-btn-wrapper {
+    width: 100%;
+}
+
+.csv-upload-sidebar .upload-btn {
+    width: 100%;
+    min-width: unset;
+}
+
+.csv-upload-sidebar .btn-process {
+    width: 100%;
+    margin-top: 4px;
+}
+
+/* Separador entre upload y panel de clusters */
+.upload-divider {
+    margin: 1.25rem 0;
+    border: 0;
+    height: 1px;
+    background: var(--border-color);
+}
+
 /* -------------------------------------
    VIEW TABS (2D vs 3D) 
 ------------------------------------- */
