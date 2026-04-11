@@ -1,5 +1,5 @@
 # STAYPRINT: Make Me Want to Travel
-
+ 
 **Impacthon 2026 · Eurostars Hotel Company**
 
 > *"No te conocemos por tu perfil, sino por tu historia."*
