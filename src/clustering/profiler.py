@@ -162,8 +162,8 @@ class ClusterProfiler:
                 "metrics": p_metrics
             })
             
-        from src.clustering.explainer import get_openai_client
-        openai_client = get_openai_client()
+        from src.clustering.explainer import get_genai_client
+        genai_client = get_genai_client()
         
         named_profiles = []
         for profile in profiles:
@@ -174,7 +174,7 @@ class ClusterProfiler:
             profile['name'] = self.generate_cluster_name_with_llm(
                 cluster_profile=temp_profile,
                 all_cluster_profiles=named_profiles,
-                openai_client=openai_client
+                genai_client=genai_client
             )
             named_profiles.append(profile)
             
@@ -187,7 +187,7 @@ class ClusterProfiler:
         profiles.sort(key=lambda x: x["metrics"]["adr"], reverse=True)
         return profiles, global_stats
 
-    def generate_cluster_name_with_llm(self, cluster_profile: dict, all_cluster_profiles: list[dict], openai_client) -> str:
+    def generate_cluster_name_with_llm(self, cluster_profile: dict, all_cluster_profiles: list[dict], genai_client) -> str:
         """
         Genera un nombre único y descriptivo para el cluster usando la API
         """
@@ -226,17 +226,19 @@ OTROS SEGMENTOS YA NOMBRADOS (el tuyo DEBE ser diferente a todos estos):
 Responde solo con el nombre (3-5 palabras en español):"""
 
         try:
-            model_name = os.environ.get("OPENAI_MODEL", "llama-3.3-70b-versatile")
-            response = openai_client.chat.completions.create(
+            from google.genai import types
+            model_name = os.environ.get("VERTEX_MODEL", "gemini-2.5-flash")
+            response = genai_client.models.generate_content(
                 model=model_name,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                max_tokens=20,
-                temperature=0.7
+                contents=user_prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_prompt,
+                    max_output_tokens=20,
+                    temperature=0.7
+                )
             )
-            name = response.choices[0].message.content.strip().strip('"').strip("'")
+            name = response.text.strip().strip('"').strip("'")
             return name
         except Exception as e:
+            logger.error(f"Error LLM Nombre Cluster: {e}")
             return f"Segmento {cluster_profile['cluster_id']}"

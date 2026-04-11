@@ -19,10 +19,10 @@ Sigue estos pasos para arrancar el entorno de Inteligencia Artificial (Backend y
    ```
 
 2. **Configurar Entorno**
-   Copia el archivo de prueba y añade tu clave de OpenAI para habilitar el motor de explicabilidad en lenguaje natural.
+   Copia el archivo de prueba y añade tus credenciales de Google Cloud para habilitar el motor de explicabilidad en lenguaje natural Vertex AI.
    ```bash
    cp .env.example .env
-   # Edita .env con nano o vim para agregar OPENAI_API_KEY
+   # Edita .env con nano o vim para agregar GOOGLE_API_KEY, VERTEX_MODEL, etc.
    ```
 
 3. **Arrancar el Servidor**
@@ -47,7 +47,7 @@ make demo
 3. Observar las **Campañas Recomendadas** generadas en la galería inferior.
 4. **Momento WOW:** En la sección Izquierda, despliega el dropdown *Matchmaker (Eurostars)* y selecciona un hotel, por ejemplo **Eurostars Torre Sevilla**.
 5. Observa cómo el sistema automáticamente proyecta un nuevo vector, inyectando el hotel flotando en 3D (`🏨`) y destacando instantáneamente los nudos de clusters exactos que coinciden con ese hotel.
-6. **Explicabilidad Humana**: Haz clic en el cluster iluminado y verás como OpenAI narra la historia perfecta del *por qué* ese turista encaja en *ese* hotel de Sevilla.
+6. **Explicabilidad Humana**: Haz clic en el cluster iluminado y verás como Vertex AI narra la historia perfecta del *por qué* ese turista encaja en *ese* hotel de Sevilla.
 7. Explica a tu interlocutor por qué se recomiendan N campañas segmentadas, leyendo el score automático de Silhouette expuesto en el panel lateral.
 
 ---

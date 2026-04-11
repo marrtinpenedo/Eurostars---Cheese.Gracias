@@ -203,7 +203,7 @@ export const dashboard = {
             });
         } else {
             const li = document.createElement('li');
-            li.textContent = "No hay explicación disponible (verifica OpenAI API).";
+            li.textContent = "No hay explicación disponible (verifica Vertex AI).";
             ul.appendChild(li);
         }
     }

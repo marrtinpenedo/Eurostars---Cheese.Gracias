@@ -8,7 +8,8 @@ Genera explicaciones humanizadas de cada cluster en dos pasos:
 
 import os
 from dotenv import load_dotenv
-from openai import OpenAI
+from google import genai
+from google.genai import types
 import json
 import logging
 from typing import Optional
@@ -16,20 +17,17 @@ from typing import Optional
 # Cargar .env explícitamente con ruta absoluta para evitar problemas de CWD
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
 
-def get_openai_client() -> OpenAI:
+def get_genai_client() -> genai.Client:
     """
-    Inicializa el cliente de Groq (compatible SDK OpenAI) leyendo la key del entorno.
+    Inicializa el cliente de Google GenAI leyendo la key del entorno.
     """
-    api_key = os.getenv("GROQ_API_KEY")
+    api_key = os.getenv("GOOGLE_API_KEY")
     if not api_key:
         raise RuntimeError(
-            "GROQ_API_KEY no encontrada. "
-            "Asegúrate de que existe un fichero .env con GROQ_API_KEY=gsk_..."
+            "GOOGLE_API_KEY no encontrada. "
+            "Asegúrate de que existe un fichero .env con GOOGLE_API_KEY=your_key..."
         )
-    return OpenAI(
-        api_key=api_key,
-        base_url="https://api.groq.com/openai/v1"
-    )
+    return genai.Client(api_key=api_key)
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +83,7 @@ def generate_cluster_explanation(dominant_features: dict, cluster_size: int, clu
     y devuelve bullet points en lenguaje natural.
     """
     try:
-        client = get_openai_client()
+        client = get_genai_client()
         
         hotel_context = f"\nEste segmento ha sido identificado como afín al hotel {hotel_name}." if hotel_name else ""
         user_prompt = f"""Describe el segmento llamado "{cluster_name}" ({cluster_size} clientes) en bullet points.{hotel_context}
@@ -97,17 +95,17 @@ IMPORTANTE: El nombre del segmento es "{cluster_name}".
 Tu descripción debe ser coherente con ese nombre.
 Devuelve solo una lista JSON de strings."""
 
-        response = client.chat.completions.create(
-            model=os.environ.get("OPENAI_MODEL", "llama-3.3-70b-versatile"),
-            messages=[
-                {"role": "system", "content": "Eres un director analista de marketing hotelero. Devuelve ÚNICAMENTE un array JSON válido de strings sin bloque markdown ni texto extra."},
-                {"role": "user", "content": user_prompt}
-            ],
-            temperature=0.7,
-            max_tokens=400
+        response = client.models.generate_content(
+            model=os.environ.get("VERTEX_MODEL", "gemini-2.5-flash"),
+            contents=user_prompt,
+            config=types.GenerateContentConfig(
+                system_instruction="Eres un director analista de marketing hotelero. Devuelve ÚNICAMENTE un array JSON válido de strings sin bloque markdown ni texto extra.",
+                temperature=0.7,
+                max_output_tokens=400,
+            )
         )
         
-        raw_output = response.choices[0].message.content.strip()
+        raw_output = response.text.strip()
         if raw_output.startswith("```json"):
             raw_output = raw_output[7:-3].strip()
         elif raw_output.startswith("```"):
@@ -117,7 +115,7 @@ Devuelve solo una lista JSON de strings."""
         return bullets if isinstance(bullets, list) else []
         
     except Exception as e:
-        logger.error(f"Error llamando a OpenAI: {e}")
+        logger.error(f"Error llamando a LLM: {e}")
         return [f"⚠️ Error generando explicación: {e}"]
 
 def get_full_explanation(
@@ -137,7 +135,7 @@ def get_full_explanation(
     bullets = generate_cluster_explanation(dominant_features, size, cluster_name, hotel_name)
     
     if not bullets:
-        bullets = ["Sin descripción detallada. (OpenAI inactivo)"]
+        bullets = ["Sin descripción detallada. (LLM inactivo)"]
         
     return {
         "cluster_id": cluster_id,

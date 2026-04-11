@@ -79,5 +79,5 @@ umap-learn==0.5.12
 uvicorn==0.44.0
 wcwidth==0.6.0
 webencodings==0.5.1
-openai>=1.0.0
+google-genai>=0.2.0
 python-dotenv

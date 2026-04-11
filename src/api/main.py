@@ -9,12 +9,12 @@ from dotenv import load_dotenv
 load_dotenv()  # debe ser la primera línea tras los imports
 
 import os
-if not os.getenv("GROQ_API_KEY"):
-    print("⚠️  ADVERTENCIA: GROQ_API_KEY no encontrada en .env")
+if not os.getenv("GOOGLE_API_KEY"):
+    print("⚠️  ADVERTENCIA: GOOGLE_API_KEY no encontrada en .env")
     print("   La explicabilidad de clusters no funcionará.")
-    print("   Añade GROQ_API_KEY=gsk-... en el fichero .env (sin comillas)")
+    print("   Añade GOOGLE_API_KEY=... en el fichero .env (sin comillas)")
 else:
-    print("✅ GROQ_API_KEY cargada correctamente")
+    print("✅ GOOGLE_API_KEY cargada correctamente")
 
 from src.api.routes import upload, pipeline, clusters, hotels
 
