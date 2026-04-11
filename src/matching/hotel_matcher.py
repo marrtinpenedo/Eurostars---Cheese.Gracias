@@ -15,12 +15,15 @@ class HotelMatcher:
         self.umap_viz_path = os.path.join(self.models_dir, "umap_model.pkl")
         self.centroids_path = os.path.join(self.models_dir, "cluster_centroids.pkl")
         
-    def _create_hotel_vector(self, hotel_series: pd.Series, expected_columns: list) -> pd.DataFrame:
+    def _create_hotel_vector(self, hotel_series: pd.Series, expected_columns: list, scaler=None) -> pd.DataFrame:
         """
         Construye un vector con la misma dimension de variables que los clientes.
-        Aquellas features ausentes se pondrán a 0.
+        Aquellas features ausentes se pondrán en la media del scaler.
         """
-        vec = {col: 0.0 for col in expected_columns}
+        if scaler and hasattr(scaler, "mean_"):
+            vec = {col: scaler.mean_[i] for i, col in enumerate(expected_columns)}
+        else:
+            vec = {col: 0.0 for col in expected_columns}
         
         # Mapeos numéricos directos presentes en hoteles
         direct_maps = ["STARS", "CITY_BEACH_FLAG", "CITY_MOUNTAIN_FLAG", 
@@ -35,8 +38,7 @@ class HotelMatcher:
             if climate_col in expected_columns:
                 vec[climate_col] = 1.0
                 
-        # Para el resto (ADR, stays, gender, country) la red UMAP imputará el zero-vector 
-        # asumiendo la línea base normalizada al cruzar esto por el Standard Scaler
+        # Para el resto (ADR, stays, gender, country) asume la línea base neutral 
         return pd.DataFrame([vec])
 
     def project_hotel_to_embedding_space(self, hotel_data: pd.Series) -> np.ndarray:
@@ -54,7 +56,7 @@ class HotelMatcher:
         if expected_cols is None:
             raise ValueError("Fallback: el scaler no tiene feature_names_in_ guardados.")
             
-        hotel_df = self._create_hotel_vector(hotel_data, expected_cols.tolist())
+        hotel_df = self._create_hotel_vector(hotel_data, expected_cols.tolist(), scaler)
         
         # Normalizar vector
         scaled_vec = scaler.transform(hotel_df)

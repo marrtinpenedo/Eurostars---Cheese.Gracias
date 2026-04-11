@@ -124,7 +124,7 @@ export const viz3d = {
             showlegend: false
         };
 
-        Plotly.newPlot(container, traces, layout, {displayModeBar: false});
+        Plotly.react(container, traces, layout, {displayModeBar: false});
 
         if (onClusterClick) {
             container.on('plotly_click', function(data) {

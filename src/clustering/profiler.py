@@ -23,13 +23,16 @@ class ClusterProfiler:
         Genera un nombre único para el cluster combinando el tipo de destino preferido
         y un diferenciador secundario (EDAD + ADR, o ADR + FRECUENCIA)
         """
-        dest_scores = {
-            'playa': cluster_profile.get('beach', 0),
-            'montaña': cluster_profile.get('mountain', 0),
-            'cultural': cluster_profile.get('heritage', 0),
-            'gastronómico': cluster_profile.get('gastronomy', 0),
-        }
-        main_attr = max(dest_scores, key=dest_scores.get)
+        def get_top_attr(metrics):
+            scores = {
+                'playa': metrics.get('beach', 0),
+                'montaña': metrics.get('mountain', 0),
+                'cultural': metrics.get('heritage', 0),
+                'gastronómico': metrics.get('gastronomy', 0),
+            }
+            return max(scores, key=scores.get)
+
+        main_attr = get_top_attr(cluster_profile)
         
         prefixes = {
             'playa': 'Amante de playa',
@@ -37,19 +40,12 @@ class ClusterProfiler:
             'cultural': 'Viajero cultural',
             'gastronómico': 'Viajero gastronómico',
         }
-        base_name = prefixes[main_attr]
+        base_name = prefixes.get(main_attr, 'Viajero genérico')
 
         siblings = [
             p for p in all_cluster_profiles
-            if p['cluster_id'] != cluster_profile['cluster_id']
-            and max({'playa': p['metrics'].get('beach', 0),
-                     'montaña': p['metrics'].get('mountain', 0),
-                     'cultural': p['metrics'].get('heritage', 0),
-                     'gastronómico': p['metrics'].get('gastronomy', 0)},
-                    key=lambda k: {'playa': p['metrics'].get('beach', 0),
-                                    'montaña': p['metrics'].get('mountain', 0),
-                                    'cultural': p['metrics'].get('heritage', 0),
-                                    'gastronómico': p['metrics'].get('gastronomy', 0)}[k]) == main_attr
+            if p.get('cluster_id') != cluster_profile.get('cluster_id')
+            and get_top_attr(p.get('metrics', {})) == main_attr
         ]
 
         if not siblings:
@@ -66,11 +62,12 @@ class ClusterProfiler:
 
         age = cluster_profile.get('age_segment', -1)
         age_label = ''
-        if 18 <= age <= 25: age_label = 'Joven'
-        elif 26 <= age <= 35: age_label = 'Millennial'
-        elif 36 <= age <= 50: age_label = 'Adulto'
-        elif 51 <= age <= 65: age_label = 'Senior'
-        elif age > 65: age_label = 'Senior+'
+        if age == 1: age_label = 'Joven'
+        elif age == 2: age_label = 'Millennial'
+        elif age == 3: age_label = 'Adulto'
+        elif age == 4: age_label = 'Adulto+'
+        elif age == 5: age_label = 'Senior'
+        elif age == 6: age_label = 'Senior+'
 
         if age_label:
             candidate = f"{base_name} · {age_label} {adr_label}"
@@ -218,7 +215,7 @@ class ClusterProfiler:
 Tu tarea es asignar nombres únicos y descriptivos a segmentos de clientes.
 Cada nombre debe tener entre 3 y 5 palabras en español.
 CRÍTICO: El nombre debe ser DIFERENTE a todos los nombres de otros segmentos proporcionados.
-Responde ÚNICAMENTE con el nombre, sin explicación, sin comillas, sin puntuación final."""
+Responde ÚNICAMENTE con un objeto JSON válido con la propiedad "name"."""
 
         user_prompt = f"""Asigna un nombre único a este segmento de clientes hoteleros.
 
@@ -235,7 +232,7 @@ SEGMENTO A NOMBRAR:
 OTROS SEGMENTOS YA NOMBRADOS (el tuyo DEBE ser diferente a todos estos):
 {other_clusters_summary}
 
-Responde solo con el nombre (3-5 palabras en español):"""
+Responde solo con el objeto JSON:"""
 
         try:
             from google.genai import types
@@ -245,10 +242,23 @@ Responde solo con el nombre (3-5 palabras en español):"""
                 contents=user_prompt,
                 config=types.GenerateContentConfig(
                     system_instruction=system_prompt,
-                    temperature=0.7
+                    temperature=0.7,
+                    response_mime_type="application/json"
                 )
             )
-            name = response.text.strip().strip('"').strip("'")
+            raw_text = response.text.strip()
+            if raw_text.startswith("```json"):
+                raw_text = raw_text[7:-3].strip()
+            elif raw_text.startswith("```"):
+                raw_text = raw_text[3:-3].strip()
+                
+            import json
+            try:
+                name = json.loads(raw_text).get("name", "Segmento Indefinido")
+            except Exception:
+                # Fallback si por algún error el JSON fallara aunque exigimos MIME type
+                name = raw_text.replace('"', '').replace('{', '').replace('}', '').strip()
+                
             return name
         except Exception as e:
             logger.error(f"Error LLM Nombre Cluster: {e}")
