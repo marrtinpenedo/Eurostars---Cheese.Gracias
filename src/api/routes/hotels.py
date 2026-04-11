@@ -97,17 +97,29 @@ def project_hotel(req: HotelProjectRequest, app_req: Request):
         "interpretation": interpretation
     }
 
-@router.get("/list")
-def list_options(app_req: Request):
-    """Lista de hoteles para nutrir el dropdown de la UI."""
-    hotels_df = getattr(app_req.app.state, "hotels_clean", None)
-    if hotels_df is None:
-        return {"hotels": []}
-        
-    h_list = []
-    for _, row in hotels_df.iterrows():
-        h_list.append({
-            "id": row["ID"],
-            "name": row.get("HOTEL_NAME", f"Hotel {row['ID']}")
+from src.data.loader import load_hotel_data
+
+@router.get("/hotels")
+def get_all_hotels():
+    """
+    Devuelve TODOS los hoteles del hotel_data.csv sin filtros ni límites.
+    """
+    hotel_df = load_hotel_data()
+    
+    hotels = []
+    for _, row in hotel_df.iterrows():
+        hotels.append({
+            "id": str(row.get("ID", "")).strip().zfill(3),
+            "name": row.get("HOTEL_NAME", ""),
+            "city": row.get("CITY_NAME", ""),
+            "country": row.get("COUNTRY_ID", ""),
+            "stars": int(row.get("STARS", 0)),
+            "brand": row.get("BRAND", ""),
+            "beach": float(row.get("CITY_BEACH_FLAG", 0)),
+            "mountain": float(row.get("CITY_MOUNTAIN_FLAG", 0)),
+            "heritage": float(row.get("CITY_HISTORICAL_HERITAGE", 0)),
+            "gastronomy": float(row.get("CITY_GASTRONOMY", 0)),
+            "price_level": float(row.get("CITY_PRICE_LEVEL", 0)),
         })
-    return {"hotels": h_list}
+    
+    return {"hotels": hotels, "total": len(hotels)}

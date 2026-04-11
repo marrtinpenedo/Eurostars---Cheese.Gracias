@@ -162,13 +162,23 @@ class ClusterProfiler:
                 "metrics": p_metrics
             })
             
+        from src.clustering.explainer import get_openai_client
+        openai_client = get_openai_client()
+        
+        named_profiles = []
         for profile in profiles:
-            # Pasa el dict de métricas planas para emular la interfaz requerida y tener el 'cluster_id' a mano
             temp_profile = profile['metrics'].copy()
             temp_profile['cluster_id'] = profile['cluster_id']
-            profile['name'] = self.generate_cluster_name(temp_profile, profiles)
+            temp_profile['cluster_size'] = profile['size']
             
-        profiles = self.ensure_unique_names(profiles)
+            profile['name'] = self.generate_cluster_name_with_llm(
+                cluster_profile=temp_profile,
+                all_cluster_profiles=named_profiles,
+                openai_client=openai_client
+            )
+            named_profiles.append(profile)
+            
+        profiles = self.ensure_unique_names(named_profiles)
             
         os.makedirs(self.models_dir, exist_ok=True)
         with open(self.centroids_path, "wb") as f:
@@ -176,3 +186,57 @@ class ClusterProfiler:
             
         profiles.sort(key=lambda x: x["metrics"]["adr"], reverse=True)
         return profiles, global_stats
+
+    def generate_cluster_name_with_llm(self, cluster_profile: dict, all_cluster_profiles: list[dict], openai_client) -> str:
+        """
+        Genera un nombre único y descriptivo para el cluster usando la API
+        """
+        other_clusters_summary = []
+        for p in all_cluster_profiles:
+            other_clusters_summary.append({
+                'id': p['cluster_id'],
+                'age': p['metrics'].get('age_segment'),
+                'adr': p['metrics'].get('adr'),
+                'frequency': p['metrics'].get('stays'),
+                'leadtime': p['metrics'].get('booking_leadtime'),
+                'countries': str(p['metrics'].get('top_country', ''))
+            })
+            
+        system_prompt = """Eres un experto en marketing hotelero. 
+Tu tarea es asignar nombres únicos y descriptivos a segmentos de clientes.
+Cada nombre debe tener entre 3 y 5 palabras en español.
+CRÍTICO: El nombre debe ser DIFERENTE a todos los nombres de otros segmentos proporcionados.
+Responde ÚNICAMENTE con el nombre, sin explicación, sin comillas, sin puntuación final."""
+
+        user_prompt = f"""Asigna un nombre único a este segmento de clientes hoteleros.
+
+SEGMENTO A NOMBRAR:
+- Rango de edad dominante: {cluster_profile.get('age_segment', 'desconocido')}
+- ADR medio: €{cluster_profile.get('adr', 0):.0f}
+- Destino preferido: playa={cluster_profile.get('beach', 0):.2f}, montaña={cluster_profile.get('mountain', 0):.2f}, heritage={cluster_profile.get('heritage', 0):.2f}, gastronomía={cluster_profile.get('gastronomy', 0):.2f}
+- Reservas confirmadas media: {cluster_profile.get('stays', 0):.1f}
+- Antelación media reserva: {cluster_profile.get('booking_leadtime', 0):.0f} días
+- Países de origen top: {cluster_profile.get('top_country', '')}
+- Duración media estancia: {cluster_profile.get('length_stay', 0):.1f} noches
+- Nº clientes: {cluster_profile.get('cluster_size', 0)}
+
+OTROS SEGMENTOS YA NOMBRADOS (el tuyo DEBE ser diferente a todos estos):
+{other_clusters_summary}
+
+Responde solo con el nombre (3-5 palabras en español):"""
+
+        try:
+            model_name = os.environ.get("OPENAI_MODEL", "llama-3.3-70b-versatile")
+            response = openai_client.chat.completions.create(
+                model=model_name,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                max_tokens=20,
+                temperature=0.7
+            )
+            name = response.choices[0].message.content.strip().strip('"').strip("'")
+            return name
+        except Exception as e:
+            return f"Segmento {cluster_profile['cluster_id']}"

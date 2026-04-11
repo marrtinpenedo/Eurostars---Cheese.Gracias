@@ -475,3 +475,167 @@ select {
     font-size: 0.8rem;
     color: var(--text-muted);
 }
+
+/* FIX 2: Bóton export CSV visible */
+.export-btn,
+.btn-export,
+[class*="export"] button,
+#export-cluster-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background-color: var(--accent-primary, #2563EB);
+    color: #FFFFFF !important;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.export-btn:hover,
+.btn-export:hover {
+    background-color: var(--accent-hover, #1D4ED8);
+}
+
+.export-container,
+.cluster-export-section {
+    background: var(--bg-card, #FFFFFF);
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 16px;
+}
+
+/* FIX 3: Toggle switch estilo iOS — funcional y visible */
+.toggle-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.toggle-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+    user-select: none;
+    cursor: pointer;
+}
+
+.toggle-input {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: #D1D5DB;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    outline: none;
+    flex-shrink: 0;
+}
+
+.toggle-input::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.toggle-input:checked {
+    background-color: var(--accent-primary, #2563EB);
+}
+
+.toggle-input:checked::before {
+    transform: translateX(20px);
+}
+
+/* FIX 5: Botones Subida CSV Estilizados */
+.csv-upload-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.upload-btn-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+}
+
+.upload-btn {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 8px 16px;
+    background: var(--bg-card, #FFFFFF);
+    border: 1.5px solid var(--border, #E5E7EB);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary, #1A1D23);
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    white-space: nowrap;
+    min-width: 160px;
+}
+
+.upload-btn:hover {
+    border-color: var(--accent-primary, #2563EB);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.upload-btn.has-file {
+    border-color: var(--success, #16A34A);
+    background: #F0FDF4;
+}
+
+.upload-filename {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted, #9CA3AF);
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.upload-btn.has-file .upload-filename {
+    color: var(--success, #16A34A);
+}
+
+.btn-process {
+    padding: 10px 22px;
+    background: var(--accent-primary, #2563EB);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, opacity 0.2s;
+    white-space: nowrap;
+}
+
+.btn-process:hover:not(:disabled) {
+    background: var(--accent-hover, #1D4ED8);
+}
+
+.btn-process:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}

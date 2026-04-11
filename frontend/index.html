@@ -26,15 +26,40 @@
             
             <div class="nav-actions">
                 <button id="btn-demo-data" class="btn btn-outline" style="display:none">Cargar Demo</button>
-                <div class="file-upload">
-                    <label for="customers_csv">Clientes CSV:</label>
-                    <input type="file" id="customers_csv" accept=".csv">
+                <div class="csv-upload-area">
+                    <!-- Clientes CSV -->
+                    <div class="upload-btn-wrapper">
+                        <button class="upload-btn" id="btn-customers">
+                            👥 Clientes CSV
+                            <span class="upload-filename" id="filename-customers">Sin archivo</span>
+                        </button>
+                        <input 
+                            type="file" 
+                            id="customers_csv" 
+                            accept=".csv"
+                            style="position:absolute;opacity:0;width:100%;height:100%;cursor:pointer;top:0;left:0;"
+                        />
+                    </div>
+
+                    <!-- Hoteles CSV -->
+                    <div class="upload-btn-wrapper">
+                        <button class="upload-btn" id="btn-hotels">
+                            🏨 Hoteles CSV
+                            <span class="upload-filename" id="filename-hotels">Sin archivo</span>
+                        </button>
+                        <input 
+                            type="file" 
+                            id="hotels_csv" 
+                            accept=".csv"
+                            style="position:absolute;opacity:0;width:100%;height:100%;cursor:pointer;top:0;left:0;"
+                        />
+                    </div>
+
+                    <!-- Botón procesar -->
+                    <button class="btn-process" id="btn-upload" disabled>
+                        🔮 Procesar Nube Geodésica
+                    </button>
                 </div>
-                <div class="file-upload">
-                    <label for="hotels_csv">Hoteles CSV:</label>
-                    <input type="file" id="hotels_csv" accept=".csv">
-                </div>
-                <button id="btn-upload" class="btn">Procesar Nube Geodésica</button>
             </div>
         </header>
 
@@ -121,8 +146,13 @@
                             <!-- JS inyectará Li items -->
                         </ul>
 
-                        <div class="action-footer">
-                            <button id="btn-export-csv" class="btn btn-outline full-width">Exportar Segmento a Hubspot (CSV)</button>
+                        <div class="export-container">
+                            <p style="font-size: 13px; color: #6B7280; margin-bottom: 10px;">
+                                Descarga la lista de clientes de este segmento para tu herramienta de email marketing.
+                            </p>
+                            <button class="export-btn" id="btn-export-csv">
+                                ⬇️ Exportar segmento como CSV
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -133,14 +163,13 @@
         <div id="segment-cards-container" class="cards-container hidden">
             <div class="cards-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <h3 style="font-size: 1.1rem; color: var(--text-main); font-weight: 600;">🎯 Campañas Recomendadas</h3>
-                <div class="toggle-container" style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
-                    <label for="toggle-names">Nombres Naturales</label>
-                    <label class="switch" style="position: relative; display: inline-block; width: 34px; height: 20px;">
-                        <input type="checkbox" id="toggle-names" checked style="opacity: 0; width: 0; height: 0;">
-                        <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--accent); transition: .4s; border-radius: 34px;">
-                            <span style="position: absolute; content: ''; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;"></span>
-                        </span>
-                    </label>
+                <div class="toggle-wrapper">
+                    <span class="toggle-label">Nombres naturales</span>
+                    <input 
+                        type="checkbox" 
+                        id="toggle-names" 
+                        class="toggle-input"
+                    />
                 </div>
             </div>
             <div id="cards-scroller" class="cards-scroller" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem;">

@@ -55,20 +55,13 @@ export const stayprintAPI = {
         return response.json();
     },
 
-    // 6. Configurar endpoint temporal demo para simular que carga catálogo
+    // 6. Endpoint real para obtener todo el catálogo de hoteles
     getHotelsCatalog: async () => {
-        // En una app real, llamaríamos a un GET /api/hotels/catalog.
-        // Dado que no implementamos un endpoint que extrae el catálogo crudo completo en Módulos 1-4,
-        // esto cargará el archivo CSV y lo parseará localmente o podemos inferir IDs desde el backend si lo hubiéramos expuesto.
-        // Simulando listado hardcodeado recuperado por un get. (Alternativa real: la lista provendría de GET de hoteles).
-        const csvPath = '/data/raw/hotel_data.csv'; 
-        // Note: No exposed static file route for raw data usually.
-        // Para la demo o proyector, necesitaremos cargar un dropdown. Retornaremos unos IDs dummy fijos, o los simulados que probamos.
-        return [
-            { id: "243", name: "Eurostars Torre Sevilla" },
-            { id: "281", name: "Aurea Catedral" },
-            { id: "247", name: "Aurea Museum" },
-            { id: "315", name: "Eurostars Aliados" }
-        ];
+        const response = await fetch(`${API_BASE}/hotels/hotels`);
+        if (!response.ok) throw new Error("Failed to load hotels catalog.");
+        const data = await response.json();
+        
+        // Ordenar por nombre para facilitar búsqueda
+        return data.hotels.sort((a, b) => a.name.localeCompare(b.name));
     }
 };

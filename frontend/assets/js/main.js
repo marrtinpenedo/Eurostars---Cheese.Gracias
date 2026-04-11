@@ -32,6 +32,41 @@ async function init() {
 
     // Botón de ejecución global
     document.getElementById('btn-upload').addEventListener('click', runPipeline);
+    
+    initFileUploads();
+}
+
+function initFileUploads() {
+    const uploads = [
+        { input: 'customers_csv', btn: 'btn-customers', label: 'filename-customers', key: 'customers' },
+        { input: 'hotels_csv',    btn: 'btn-hotels',    label: 'filename-hotels',    key: 'hotels'    }
+    ];
+    
+    const processBtn = document.getElementById('btn-upload');
+    const filesSelected = { customers: false, hotels: false };
+    
+    uploads.forEach(({ input, btn, label, key }) => {
+        const inputEl = document.getElementById(input);
+        const btnEl   = document.getElementById(btn);
+        const labelEl = document.getElementById(label);
+        
+        if (inputEl) {
+            inputEl.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    const name = this.files[0].name;
+                    labelEl.textContent = name;
+                    btnEl.classList.add('has-file');
+                    filesSelected[key] = true;
+                } else {
+                    labelEl.textContent = 'Sin archivo';
+                    btnEl.classList.remove('has-file');
+                    filesSelected[key] = false;
+                }
+                // Habilitar botón solo cuando ambos CSVs están seleccionados
+                processBtn.disabled = !(filesSelected.customers && filesSelected.hotels);
+            });
+        }
+    });
 }
 
 async function runPipeline() {

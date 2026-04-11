@@ -112,10 +112,14 @@ export const dashboard = {
     populateHotels: (hotels) => {
         const sel = dashboard.els.hotelDropdown;
         sel.innerHTML = '<option value="">Selecciona un hotel...</option>';
-        hotels.forEach(h => {
+        hotels.forEach(hotel => {
             const opt = document.createElement('option');
-            opt.value = h.id;
-            opt.textContent = h.name;
+            opt.value = hotel.id;
+            
+            const stars = '⭐'.repeat(hotel.stars || 0);
+            const city = hotel.city || 'Desconocida';
+            opt.textContent = `${hotel.name} (${city}, ${stars})`;
+            
             sel.appendChild(opt);
         });
     },
