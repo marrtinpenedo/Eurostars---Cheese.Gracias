@@ -6,11 +6,15 @@ from contextlib import asynccontextmanager
 import logging
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv()  # debe ser la primera línea tras los imports
 
 import os
 if not os.getenv("OPENAI_API_KEY"):
-    raise RuntimeError("OPENAI_API_KEY no encontrada en .env — revisa tu fichero .env")
+    print("⚠️  ADVERTENCIA: OPENAI_API_KEY no encontrada en .env")
+    print("   La explicabilidad de clusters no funcionará.")
+    print("   Añade OPENAI_API_KEY=sk-... en el fichero .env (sin comillas)")
+else:
+    print("✅ OPENAI_API_KEY cargada correctamente")
 
 from src.api.routes import upload, pipeline, clusters, hotels
 

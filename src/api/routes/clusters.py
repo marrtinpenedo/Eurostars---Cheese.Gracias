@@ -49,6 +49,22 @@ from src.clustering.explainer import get_full_explanation
 class ExplainRequest(BaseModel):
     hotel_name: Optional[str] = None
 
+from src.clustering.explainer import get_openai_client
+
+@router.get("/debug/openai")
+async def debug_openai():
+    try:
+        client = get_openai_client()
+        # Llamada mínima para verificar autenticación
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": "di ok"}],
+            max_tokens=5
+        )
+        return {"status": "ok", "model": "gpt-4o-mini", "response": response.choices[0].message.content}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
+
 @router.post("/{cluster_id}/explain")
 def explain_cluster(cluster_id: int, req: ExplainRequest, request: Request):
     """

@@ -8,13 +8,32 @@ Genera explicaciones humanizadas de cada cluster en dos pasos:
 
 import os
 from dotenv import load_dotenv
-import openai
+from openai import OpenAI
 import json
 import logging
 from typing import Optional
 
-load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Cargar .env explícitamente con ruta absoluta para evitar problemas de CWD
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
+
+def get_openai_client() -> OpenAI:
+    """
+    Inicializa el cliente OpenAI leyendo la key del entorno.
+    Lanza error descriptivo si no encuentra la key.
+    """
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError(
+            "OPENAI_API_KEY no encontrada. "
+            "Asegúrate de que existe un fichero .env en la raíz del proyecto "
+            "con la línea: OPENAI_API_KEY=sk-... (sin comillas)"
+        )
+    if api_key.startswith('"') or api_key.startswith("'"):
+        raise RuntimeError(
+            "OPENAI_API_KEY tiene comillas. "
+            "Edita el .env y elimina las comillas alrededor del valor."
+        )
+    return OpenAI(api_key=api_key)
 
 logger = logging.getLogger(__name__)
 
@@ -69,12 +88,8 @@ def generate_cluster_explanation(dominant_features: dict, cluster_size: int, hot
     Llama a OpenAI gpt-4o-mini con los atributos dominantes del cluster
     y devuelve bullet points en lenguaje natural y nombre del cluster.
     """
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key or api_key == "your_key_here":
-        return ["Reemplaza OPENAI_API_KEY en tu .env para ver predicciones.", f"Resumen Dummy: ADR {dominant_features.get('adr_level')}"]
-        
     try:
-        client = openai.OpenAI(api_key=api_key)
+        client = get_openai_client()
         
         hotel_context = f"\\nEste segmento ha sido identificado como altamente afín y predispuesto a reservar en el hotel: {hotel_name}." if hotel_name else ""
         user_prompt = f"""Describe creativamente a este segmento de clientes en bullet points.{hotel_context}
@@ -118,13 +133,17 @@ def get_full_explanation(
     """
     c_data = next((c for c in cluster_profiles if c["cluster_id"] == cluster_id), {})
     size = c_data.get("size", 0)
+    rule_based_name = c_data.get("name", f"Segmento #{cluster_id}")
     
     dominant_features = extract_dominant_features(cluster_id, cluster_profiles, global_stats)
     bullets = generate_cluster_explanation(dominant_features, size, hotel_name)
     
-    cluster_name = bullets.pop(0) if bullets else f"Segmento #{cluster_id}"
+    cluster_name = rule_based_name
+    if bullets and not str(bullets[0]).startswith("⚠️") and not str(bullets[0]).startswith("Reemplaza"):
+        cluster_name = bullets.pop(0)
+    
     if not bullets:
-        bullets = ["Sin descripción disponible."]
+        bullets = ["Sin descripción detallada. (OpenAI inactivo)"]
         
     return {
         "cluster_id": cluster_id,
