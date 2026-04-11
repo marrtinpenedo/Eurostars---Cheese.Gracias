@@ -92,8 +92,8 @@ export const viz2d = {
 
                 const html = `
                     <div style="font-weight:bold; margin-bottom:4px;">${d.name || `Segmento #${d.cluster_id}`}</div>
-                    <div style="margin-bottom:2px;">👥 Segmento: ${d.size} viajeros</div>
-                    <div>🎯 Preferencia: ${topMetrics}</div>
+                    <div style="margin-bottom:2px;">Segmento: ${d.size} viajeros</div>
+                    <div>Preferencia: ${topMetrics}</div>
                 `;
                 tooltip.html(html).style("visibility", "visible");
                 d3.select(event.currentTarget).select("circle").attr("stroke", "#fff").attr("stroke-width", 2);
@@ -171,7 +171,7 @@ export const viz2d = {
                         .attr("transform", `translate(${finalX}, ${finalY})`)
                         .style("cursor", "crosshair")
                         .on("mouseover", () => {
-                            tooltip.html(`<b>🏨 ${pt.hotel.name}</b><br>Posición afín ponderada`)
+                            tooltip.html(`<b>${pt.hotel.name}</b><br>Posición afín ponderada`)
                                 .style("visibility", "visible");
                         })
                         .on("mousemove", (event) => {

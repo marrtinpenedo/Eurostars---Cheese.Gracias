@@ -87,7 +87,7 @@ export const dashboard = {
             span.style.borderColor = HOTEL_COLORS[index] || '#1A1D23';
             
             span.innerHTML = `
-                🏨 ${hotel.name}
+                ${hotel.name}
                 <button class="remove-hotel" data-id="${hotel.id}">×</button>
             `;
             container.appendChild(span);
@@ -105,7 +105,7 @@ export const dashboard = {
     updateGlobalStats: (data) => {
         dashboard.els.statClusters.textContent = data.n_clusters;
         if (data.optimal_suggestion) {
-            dashboard.els.optBadge.textContent = `Sugerido: ${data.optimal_suggestion} ⭐`;
+            dashboard.els.optBadge.textContent = `Sugerido: ${data.optimal_suggestion}`;
         }
     },
 
@@ -116,7 +116,7 @@ export const dashboard = {
             const opt = document.createElement('option');
             opt.value = hotel.id;
             
-            const stars = '⭐'.repeat(hotel.stars || 0);
+            const stars = '*'.repeat(hotel.stars || 0);
             const city = hotel.city || 'Desconocida';
             opt.textContent = `${hotel.name} (${city}, ${stars})`;
             
@@ -162,8 +162,8 @@ export const dashboard = {
                     <span class="affinity-badge" style="display:none; margin-left: 6px; font-size: 11px; font-weight: 600; color: #166534; background: #DCFCE7; padding: 2px 6px; border-radius: 9999px;"></span>
                 </h4>
                 <div class="card-stats">
-                    <span title="Tamaño del segmento">👥 ${card.size}</span>
-                    <span title="ADR">💶 €${parseFloat(adrVal).toFixed(0)}</span>
+                    <span title="Tamaño del segmento">${card.size}</span>
+                    <span title="ADR">€${parseFloat(adrVal).toFixed(0)}</span>
                 </div>
             `;
             div.addEventListener('click', () => onCardClick(card.cluster_id));
@@ -240,7 +240,7 @@ export const dashboard = {
         // 2 líneas estáticas del profiler — sin red, sin /explain
         const ul = dashboard.els.aiBullets;
         ul.innerHTML = '';
-        [`💶 ADR medio: ${adr}`, `📅 Antelación media de reserva: ${leadtime}`].forEach(text => {
+        [`ADR medio: ${adr}`, `Antelación media de reserva: ${leadtime}`].forEach(text => {
             const li = document.createElement('li');
             li.textContent = text;
             ul.appendChild(li);

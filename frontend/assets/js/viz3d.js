@@ -38,7 +38,7 @@ export const viz3d = {
                 const cId = d.cluster;
                 const isAffine = projData.affine_clusters.some(c => c.cluster_id === cId);
                 if (isAffine) {
-                    affinePrefix = "⭐ AFÍN - ";
+                    affinePrefix = "AFIN - ";
                     hlMode = true;
                 }
             }
@@ -95,8 +95,8 @@ export const viz3d = {
                     z: [hotel.coords_3d[2]],
                     mode: 'markers+text',
                     type: 'scatter3d',
-                    name: `🏨 ${hotel.name}`,
-                    text: [`🏨 ${hotel.name}`],
+                    name: hotel.name,
+                    text: [hotel.name],
                     textposition: 'top center',
                     textfont: { color: '#1A1D23', size: 14, weight: 'bold' },
                     hoverinfo: 'text',

@@ -401,9 +401,9 @@ function renderCampaignsView() {
             <h3 class="cc-name">${name}</h3>
             <div class="cc-meta">
                 <span class="cc-meta-item cc-adr">€${parseFloat(adrVal).toFixed(0)}</span>
-                <span class="cc-meta-item">👥 ${card.size} clientes</span>
+                <span class="cc-meta-item">${card.size} clientes</span>
             </div>
-            ${isAffine ? `<div class="cc-affinity-badge">⭐ Afín a ${hotelLabel}</div>` : ''}
+            ${isAffine ? `<div class="cc-affinity-badge">Afín a ${hotelLabel}</div>` : ''}
             <button class="cc-toggle-btn">
                 Ver análisis <span class="cc-toggle-arrow">→</span>
             </button>
@@ -416,7 +416,7 @@ function renderCampaignsView() {
                 <ul class="cc-bullets"></ul>
                 <div class="cc-export-wrap" style="display:none;">
                     <p class="cc-export-hint">Descarga la lista de clientes de este segmento.</p>
-                    <button class="cc-export-btn" data-cluster-id="${cid}">⬇ Exportar segmento CSV</button>
+                    <button class="cc-export-btn" data-cluster-id="${cid}">Exportar segmento CSV</button>
                 </div>
             </div>
         `;
