@@ -159,7 +159,8 @@ class ClusterProfiler:
                 "cluster_id": int(cluster_id),
                 "name": "",
                 "size": len(cluster_data),
-                "metrics": p_metrics
+                "metrics": p_metrics,
+                "centroid_2d": [float(centroids_3d[cluster_id][0]), float(centroids_3d[cluster_id][1])]
             })
             
         from src.clustering.explainer import get_genai_client

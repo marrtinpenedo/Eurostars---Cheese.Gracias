@@ -4,6 +4,7 @@
 
 import { stayprintAPI } from './api.js';
 import { viz3d } from './viz3d.js';
+import { viz2d } from './viz2d.js';
 import { dashboard } from './dashboard.js';
 
 
@@ -55,9 +56,34 @@ function onHotelProjected(responseData) {
     window.syncAffinityUI();
 }
 
+function setupViewTabs() {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.view-panel');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Update active button
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            // Show selected panel
+            const targetId = tab.getAttribute('data-target');
+            panels.forEach(panel => {
+                if(panel.id === targetId) {
+                    panel.style.display = 'block';
+                    panel.classList.add('active-view');
+                } else {
+                    panel.style.display = 'none';
+                    panel.classList.remove('active-view');
+                }
+            });
+        });
+    });
+}
 
 async function init() {
     console.log("Stayprint Init");
+    setupViewTabs();
     
     // Bind UI actions
     dashboard.init(
@@ -159,7 +185,16 @@ async function runRecluster(minSize) {
         viz3d.render(reclusterData.scatter_data, reclusterData.n_clusters, null, handleClusterClick);
         
         const summary = await stayprintAPI.getSummary();
-        dashboard.renderCards(summary.clusters || summary, handleClusterClick);
+        window.stayprintState.clusterCards = summary.clusters || summary;
+        dashboard.renderCards(window.stayprintState.clusterCards, handleClusterClick);
+        
+        // Render 2D View
+        viz2d.render(
+            window.stayprintState.clusterCards, 
+            window.stayprintState.activeHotels, 
+            window.stayprintState.affineClusters, 
+            handleClusterClick
+        );
 
     } catch (e) {
         console.error(e);
@@ -181,6 +216,9 @@ async function updateHotelProjection() {
     if (window.stayprintState.activeHotels.length === 0) {
         if(viz3d.currentData) {
             viz3d.render(viz3d.currentData, window.stayprintState.numClusters, null, handleClusterClick);
+            if(window.stayprintState.clusterCards) {
+                viz2d.render(window.stayprintState.clusterCards, [], new Set(), handleClusterClick);
+            }
         }
         return;
     }
@@ -193,6 +231,14 @@ async function updateHotelProjection() {
         
         if(viz3d.currentData) {
             viz3d.render(viz3d.currentData, window.stayprintState.numClusters, projData, handleClusterClick);
+            if(window.stayprintState.clusterCards) {
+                viz2d.render(
+                    window.stayprintState.clusterCards, 
+                    window.stayprintState.activeHotels, 
+                    window.stayprintState.affineClusters, 
+                    handleClusterClick
+                );
+            }
         } else {
             document.getElementById('loader-3d').classList.add('hidden');
         }
