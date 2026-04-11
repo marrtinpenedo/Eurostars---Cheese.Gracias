@@ -36,6 +36,20 @@ window.goToCampaigns = function() {
 window.goToSegmentation = function() {
     showView("view-segmentation");
 };
+
+// Módulo 3 — CTA state management
+function updateCTAButton() {
+    const btn = document.getElementById('btn-go-campaigns');
+    if (!btn) return;
+    const cards = window.stayprintState.clusterCards;
+    if (cards && cards.length > 0) {
+        btn.disabled = false;
+        btn.classList.remove('btn-disabled');
+    } else {
+        btn.disabled = true;
+        btn.classList.add('btn-disabled');
+    }
+}
 // ------------------------
 
 window.syncAffinityUI = function() {
@@ -217,6 +231,9 @@ async function runRecluster(minSize) {
             window.stayprintState.affineClusters, 
             handleClusterClick
         );
+
+        // Módulo 3 — activar CTA si hay clusters
+        updateCTAButton();
 
     } catch (e) {
         console.error(e);

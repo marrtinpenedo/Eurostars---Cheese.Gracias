@@ -703,3 +703,54 @@ select {
 #venn-container svg {
     overflow: visible;
 }
+
+/* ─────────────────────────────────────────
+   MÓDULO 3 — Botón CTA "Ver campañas"
+───────────────────────────────────────── */
+.cta-campaigns-wrapper {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(to top, rgba(245,246,248,0.95) 60%, transparent);
+    z-index: 20;
+    pointer-events: none; /* el wrapper no bloquea clicks en el scatter */
+}
+
+.btn-go-campaigns {
+    display: block;
+    width: 100%;
+    padding: 0.85rem 1.5rem;
+    background: var(--accent-primary);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    pointer-events: all; /* el botón sí recibe clicks */
+    transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+}
+
+.btn-go-campaigns:hover:not(:disabled) {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+}
+
+.btn-go-campaigns:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-go-campaigns.btn-disabled,
+.btn-go-campaigns:disabled {
+    background: var(--border);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
