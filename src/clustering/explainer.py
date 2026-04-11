@@ -101,7 +101,7 @@ Devuelve solo una lista JSON de strings."""
             config=types.GenerateContentConfig(
                 system_instruction="Eres un director analista de marketing hotelero. Devuelve ÚNICAMENTE un array JSON válido de strings sin bloque markdown ni texto extra.",
                 temperature=0.7,
-                max_output_tokens=400,
+                response_mime_type="application/json"
             )
         )
         
@@ -111,12 +111,16 @@ Devuelve solo una lista JSON de strings."""
         elif raw_output.startswith("```"):
             raw_output = raw_output[3:-3].strip()
             
-        bullets = json.loads(raw_output)
-        return bullets if isinstance(bullets, list) else []
+        try:
+            bullets = json.loads(raw_output)
+            return bullets if isinstance(bullets, list) else []
+        except json.JSONDecodeError as je:
+            logger.error(f"Fallo al parsear JSON: {je} - Salida del LLM: {raw_output}")
+            return [f"⚠️ Error generando explicación: {je}", f"Texto crudo LLM: {raw_output}"]
         
     except Exception as e:
         logger.error(f"Error llamando a LLM: {e}")
-        return [f"⚠️ Error generando explicación: {e}"]
+        return [f"⚠️ Error al conectar con LLM: {e}"]
 
 def get_full_explanation(
     cluster_id: int,

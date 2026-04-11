@@ -233,7 +233,6 @@ Responde solo con el nombre (3-5 palabras en español):"""
                 contents=user_prompt,
                 config=types.GenerateContentConfig(
                     system_instruction=system_prompt,
-                    max_output_tokens=20,
                     temperature=0.7
                 )
             )
