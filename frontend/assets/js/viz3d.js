@@ -12,6 +12,35 @@ export const viz3d = {
         document.getElementById('loader-3d').classList.remove('hidden');
     },
 
+    selectClusterInScatter: (clusterId) => {
+        const scatter = document.getElementById(viz3d.plotId);
+        if (!scatter || !scatter.data) return;
+
+        scatter.data.forEach((trace, traceIndex) => {
+            const isSelected = trace.name === `Segmento ${clusterId}` 
+                            || (trace.customdata && trace.customdata[0] === clusterId);
+            // Si es un hotel, conservarlo intacto
+            if(trace.name.startsWith('🏨')) return;
+
+            Plotly.restyle(viz3d.plotId, {
+                'marker.size': isSelected ? 7 : 3,
+                'marker.opacity': isSelected ? 1.0 : 0.15,
+            }, [traceIndex]);
+        });
+    },
+
+    clearScatterSelection: () => {
+        const scatter = document.getElementById(viz3d.plotId);
+        if (!scatter || !scatter.data) return;
+        scatter.data.forEach((trace, traceIndex) => {
+            if(trace.name.startsWith('🏨')) return;
+            Plotly.restyle(viz3d.plotId, {
+                'marker.size': 4,
+                'marker.opacity': 0.85,
+            }, [traceIndex]);
+        });
+    },
+
     /**
      * scatterData: array de {x, y, z, cluster, guest_id}
      * numClusters: int
@@ -58,12 +87,23 @@ export const viz3d = {
         Object.keys(grouped).forEach((k) => {
             let opacity = 0.6;
             let size = 3;
+            let symbol = 'circle';
+            const kInt = parseInt(k);
+            let color = colors[kInt % colors.length];
+
+            // 10D: Estilo ruido
+            if (kInt === -1) {
+                symbol = 'circle-open';
+                color = '#9CA3AF'; // Gris
+                opacity = 0.4;
+            }
+
             // Highlight logic
             if (projData) {
-                const isAffine = projData.affine_clusters.some(c => c.cluster_id === parseInt(k));
+                const isAffine = projData.affine_clusters.some(c => c.cluster_id === kInt);
                 if (isAffine) {
-                    opacity = 0.9;
-                    size = 5;
+                    opacity = kInt === -1 ? 0.7 : 0.9;
+                    size = kInt === -1 ? 4 : 5;
                 } else {
                     opacity = 0.1;
                 }
@@ -78,7 +118,8 @@ export const viz3d = {
                 hoverinfo: 'text',
                 marker: {
                     size: size,
-                    color: colors[parseInt(k) % colors.length],
+                    color: color,
+                    symbol: symbol,
                     opacity: opacity,
                     line: { width: 0 }
                 },
@@ -129,7 +170,8 @@ export const viz3d = {
         if (onClusterClick) {
             container.on('plotly_click', function(data) {
                 if(data.points && data.points[0] && data.points[0].customdata !== undefined){
-                    const clickedClusterId = data.points[0].customdata;
+                    let clickedClusterId = data.points[0].customdata;
+                    if(Array.isArray(clickedClusterId)) clickedClusterId = clickedClusterId[0];
                     onClusterClick(clickedClusterId);
                 }
             });

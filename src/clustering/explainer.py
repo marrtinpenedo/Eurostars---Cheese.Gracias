@@ -19,15 +19,15 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '..', '.en
 
 def get_genai_client() -> genai.Client:
     """
-    Inicializa el cliente de Google GenAI leyendo la key del entorno.
+    Inicializa el cliente de Google GenAI leyendo el proyecto y location de entorno (ADC).
     """
-    api_key = os.getenv("GOOGLE_API_KEY")
-    if not api_key:
+    project = os.getenv("GOOGLE_CLOUD_PROJECT")
+    location = os.getenv("VERTEX_LOCATION")
+    if not project or not location:
         raise RuntimeError(
-            "GOOGLE_API_KEY no encontrada. "
-            "Asegúrate de que existe un fichero .env con GOOGLE_API_KEY=your_key..."
+            "Faltan variables GOOGLE_CLOUD_PROJECT o VERTEX_LOCATION en el archivo .env."
         )
-    return genai.Client(api_key=api_key)
+    return genai.Client(vertexai=True, project=project, location=location)
 
 logger = logging.getLogger(__name__)
 

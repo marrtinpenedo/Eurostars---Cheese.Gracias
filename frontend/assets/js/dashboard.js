@@ -112,6 +112,16 @@ export const dashboard = {
     populateHotels: (hotels) => {
         const sel = dashboard.els.hotelDropdown;
         sel.innerHTML = '<option value="">Selecciona un hotel...</option>';
+        
+        let dragList = document.getElementById('drag-hotels-list');
+        if(!dragList) {
+            dragList = document.createElement('div');
+            dragList.id = 'drag-hotels-list';
+            dragList.style.cssText = "max-height: 150px; overflow-y: auto; margin-top: 10px; border-radius:6px; padding:2px;";
+            dashboard.els.hotelDropdown.parentNode.insertBefore(dragList, dashboard.els.activeHotelsContainer);
+        }
+        dragList.innerHTML = '';
+        
         hotels.forEach(hotel => {
             const opt = document.createElement('option');
             opt.value = hotel.id;
@@ -119,9 +129,20 @@ export const dashboard = {
             const stars = '⭐'.repeat(hotel.stars || 0);
             const city = hotel.city || 'Desconocida';
             opt.textContent = `${hotel.name} (${city}, ${stars})`;
-            
             sel.appendChild(opt);
+
+            // Crear elemento arrastrable 10E
+            const dragItem = document.createElement('div');
+            dragItem.className = 'hotel-draggable';
+            dragItem.draggable = true;
+            dragItem.dataset.hotelId = hotel.id;
+            dragItem.dataset.hotelName = hotel.name;
+            dragItem.textContent = `${hotel.name} — ${city}`;
+            dragList.appendChild(dragItem);
         });
+
+        // Re-bind drag events (which main.js does globally, but let's be safe)
+        if(window.initDragAndDrop) window.initDragAndDrop();
     },
 
     renderCards: (cards, onCardClick) => {
@@ -144,20 +165,30 @@ export const dashboard = {
 
         const useNaturalNames = document.getElementById('toggle-names')?.checked ?? true;
 
-        cards.forEach(card => {
+        // Insert noise cluster at the end
+        const regularCards = cards.filter(c => c.cluster_id !== -1);
+        const noiseCards = cards.filter(c => c.cluster_id === -1);
+        const sortedCards = [...regularCards, ...noiseCards];
+
+        sortedCards.forEach(card => {
+            const isNoise = card.cluster_id === -1;
             const div = document.createElement('div');
-            div.className = 'segment-card';
+            div.className = isNoise ? 'segment-card noise-cluster' : 'segment-card';
+            div.dataset.clusterId = card.cluster_id;
             
             const titleStr = useNaturalNames ? (card.name || 'Segmento ' + card.cluster_id) : `Segmento #${card.cluster_id}`;
             const adrVal = card.metrics ? card.metrics.adr : (card.adr_mean || 0);
             
+            const noiseLabelHTML = isNoise ? `<span class="noise-label">Viajeros que no encajan en ningún segmento estándar</span>` : '';
+            
             div.innerHTML = `
                 <div class="card-header">
-                    <span class="card-color-indicator" style="background:${colors[card.cluster_id % colors.length]}"></span>
+                    <span class="card-color-indicator" style="background:${isNoise ? '#9CA3AF' : colors[card.cluster_id % colors.length]}"></span>
                     <span class="badge">#${card.cluster_id}</span>
                 </div>
                 <h4 class="card-title" title="${titleStr}">${titleStr}</h4>
-                <div class="card-stats">
+                ${noiseLabelHTML}
+                <div class="card-stats" style="${isNoise ? 'margin-top: 10px;' : ''}">
                     <span title="Tamaño del segmento">👥 ${card.size}</span>
                     <span title="ADR (Average Daily Rate): Gasto promedio diario estimado">💶 €${parseFloat(adrVal).toFixed(0)}</span>
                 </div>
@@ -165,6 +196,36 @@ export const dashboard = {
             div.addEventListener('click', () => onCardClick(card.cluster_id));
             scroller.appendChild(div);
         });
+    },
+
+    renderHotelSimilarityDisclaimer: (similarityInfo) => {
+        const container = document.getElementById('hotel-disclaimer-container');
+        if (!container) return;
+
+        if (!similarityInfo || !similarityInfo.show_disclaimer) {
+            container.style.display = 'none';
+            return;
+        }
+
+        container.style.display = 'block';
+        container.innerHTML = `
+            <div class="disclaimer-box">
+                <div class="disclaimer-header">
+                    Hoteles con perfiles distintos
+                </div>
+                <div class="disclaimer-body">
+                    Los hoteles seleccionados tienen características muy diferentes entre sí. 
+                    Los segmentos mostrados son los más afines al conjunto, pero pueden no ser 
+                    igualmente relevantes para cada hotel.
+                </div>
+                <div class="disclaimer-score">
+                    Similitud entre hoteles: 
+                    <span class="similarity-badge similarity-${similarityInfo.similarity_label.toLowerCase()}">
+                        ${similarityInfo.similarity_label} (${Math.round(similarityInfo.similarity_score * 100)}%)
+                    </span>
+                </div>
+            </div>
+        `;
     },
 
     showAILoading: () => {

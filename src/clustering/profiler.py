@@ -162,6 +162,38 @@ class ClusterProfiler:
                 "metrics": p_metrics
             })
             
+        # 10D: Manejo de Ruido (-1)
+        noise_mask = df["Cluster"] == -1
+        if noise_mask.sum() > 0:
+            noise_data = df[noise_mask]
+            age_mode = int(noise_data["AGE_NUM"].mode().iloc[0]) if "AGE_NUM" in noise_data.columns and not noise_data["AGE_NUM"].mode().empty else -1
+            peak_month = int(noise_data["PEAK_MONTH"].mode().iloc[0]) if "PEAK_MONTH" in noise_data.columns and not noise_data["PEAK_MONTH"].mode().empty else 6
+            top_country = self._extract_top_cat(noise_data, "COUNTRY_GUEST_")
+            
+            n_metrics = {
+                "age_segment": age_mode,
+                "peak_month": peak_month,
+                "top_country": top_country,
+                "adr": round(float(noise_data.get("CONFIRMED_RESERVATIONS_ADR", pd.Series([0])).mean()), 2),
+                "length_stay": round(float(noise_data.get("AVG_LENGTH_STAY", pd.Series([0])).mean()), 1),
+                "booking_leadtime": round(float(noise_data.get("AVG_BOOKING_LEADTIME", pd.Series([0])).mean()), 1),
+                "beach": round(float(noise_data.get("CITY_BEACH_FLAG", pd.Series([0])).mean()), 2),
+                "mountain": round(float(noise_data.get("CITY_MOUNTAIN_FLAG", pd.Series([0])).mean()), 2),
+                "heritage": round(float(noise_data.get("CITY_HISTORICAL_HERITAGE", pd.Series([0])).mean()), 2),
+                "gastronomy": round(float(noise_data.get("CITY_GASTRONOMY", pd.Series([0])).mean()), 2),
+                "score": round(float(noise_data.get("AVG_SCORE", pd.Series([0])).mean()), 1),
+                "stays": round(float(noise_data.get("LAST_2_YEARS_STAYS", pd.Series([0])).mean()), 1),
+                "global_avg_adr": global_stats['adr']
+            }
+            
+            profiles.append({
+                "cluster_id": -1,
+                "name": "",
+                "size": len(noise_data),
+                "metrics": n_metrics,
+                "is_noise": True
+            })
+            
         from src.clustering.explainer import get_genai_client
         genai_client = get_genai_client()
         
@@ -171,14 +203,22 @@ class ClusterProfiler:
             temp_profile['cluster_id'] = profile['cluster_id']
             temp_profile['cluster_size'] = profile['size']
             
-            profile['name'] = self.generate_cluster_name_with_llm(
-                cluster_profile=temp_profile,
-                all_cluster_profiles=named_profiles,
-                genai_client=genai_client
-            )
+            if profile.get('is_noise'):
+                profile['name'] = self.generate_noise_cluster_name(temp_profile, genai_client)
+            else:
+                profile['name'] = self.generate_cluster_name_with_llm(
+                    cluster_profile=temp_profile,
+                    all_cluster_profiles=named_profiles,
+                    genai_client=genai_client
+                )
             named_profiles.append(profile)
             
-        profiles = self.ensure_unique_names(named_profiles)
+        # Filtrar el ruido antes de unique_names para que no ensucie la lógica
+        regular_profiles = [p for p in named_profiles if p['cluster_id'] != -1]
+        noise_profiles = [p for p in named_profiles if p['cluster_id'] == -1]
+        
+        regular_profiles = self.ensure_unique_names(regular_profiles)
+        profiles = regular_profiles + noise_profiles
             
         os.makedirs(self.models_dir, exist_ok=True)
         with open(self.centroids_path, "wb") as f:
@@ -241,3 +281,28 @@ Responde solo con el nombre (3-5 palabras en español):"""
         except Exception as e:
             logger.error(f"Error LLM Nombre Cluster: {e}")
             return f"Segmento {cluster_profile['cluster_id']}"
+
+    def generate_noise_cluster_name(self, noise_profile: dict, genai_client) -> str:
+        prompt = f"""Estos son clientes hoteleros que no encajan en ningún segmento estándar — son viajeros con comportamientos únicos o atípicos.
+
+Sus datos agregados:
+- Nº clientes: {noise_profile.get('cluster_size')}
+- ADR medio: €{noise_profile.get('adr', 0):.0f}
+- Destino preferido: playa={noise_profile.get('beach',0):.2f}, montaña={noise_profile.get('mountain',0):.2f}, heritage={noise_profile.get('heritage',0):.2f}
+- Reservas media: {noise_profile.get('stays',0):.1f}
+
+Genera un nombre de 3-4 palabras en español que capture su naturaleza única.
+Ejemplos del estilo buscado: "Viajeros de Perfil Único", "Exploradores Sin Patrón", "Clientes Singulares"
+Responde solo con el nombre, sin comillas:"""
+        try:
+            from google.genai import types
+            model_name = os.environ.get("VERTEX_MODEL", "gemini-2.5-flash")
+            response = genai_client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(temperature=0.8)
+            )
+            return response.text.strip().strip('"').strip("'")
+        except Exception as e:
+            logger.error(f"Error LLM Nombre Noise: {e}")
+            return "Viajeros de Perfil Único"

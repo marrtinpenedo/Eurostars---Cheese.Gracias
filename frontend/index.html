@@ -102,7 +102,12 @@
             </aside>
 
             <!-- ESPACIO CENTRAL PLOTLY -->
-            <section class="canvas-container">
+            <section class="canvas-container" id="scatter-container">
+                <div id="scatter-drop-overlay" class="scatter-drop-overlay" style="display:none;">
+                    <div class="drop-hint">
+                        Suelta aquí para proyectar en el espacio vectorial
+                    </div>
+                </div>
                 <div id="loader-3d" class="loader-overlay hidden">
                     <div class="spinner"></div>
                     <p>Calculando topología UMAP y aglutinando densidades...</p>
@@ -112,7 +117,7 @@
 
             <!-- EXPLICADOR DERECHO -->
             <aside class="sidebar-right glass-panel">
-                <!-- ... existing content ... -->
+                <div id="hotel-disclaimer-container" style="display:none;"></div>
                 <div id="ai-panel">
                     <!-- Empty State -->
                     <div id="ai-empty" class="state-view">

@@ -409,13 +409,19 @@ select {
     padding: 20px;
     box-shadow: var(--shadow-sm);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
-.segment-card:hover {
-    border-color: var(--accent-primary);
+.segment-card.selected {
+    border-color: var(--accent-primary, #2563EB);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15), 0 4px 16px rgba(37, 99, 235, 0.12);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+}
+
+.segment-card:hover:not(.selected) {
+    border-color: #D1D5DB;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
 }
 
 .card-header {
@@ -638,4 +644,102 @@ select {
 .btn-process:disabled {
     opacity: 0.45;
     cursor: not-allowed;
+}
+
+/* Modulo 10C: Disclaimer de similitud */
+.disclaimer-box {
+    background: #FFFBEB;
+    border: 1px solid #F59E0B;
+    border-left: 4px solid #F59E0B;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    font-size: 13px;
+}
+.disclaimer-header { font-weight: 600; color: #92400E; margin-bottom: 4px; }
+.disclaimer-body { color: #78350F; line-height: 1.5; margin-bottom: 8px; }
+.disclaimer-score { color: #92400E; font-size: 12px; }
+.similarity-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-weight: 600; font-size: 11px; }
+.similarity-badge.similarity-alta { background: #D1FAE5; color: #065F46; }
+.similarity-badge.similarity-media { background: #FEF3C7; color: #92400E; }
+.similarity-badge.similarity-baja { background: #FEE2E2; color: #991B1B; }
+
+/* Modulo 10D: Noise cluster */
+.segment-card.noise-cluster {
+    border-style: dashed;
+    border-color: #D1D5DB;
+    background: #FAFAFA;
+    opacity: 0.85;
+}
+.segment-card.noise-cluster .badge {
+    background: #F3F4F6;
+    color: #6B7280;
+    border: 1px solid #D1D5DB;
+}
+.noise-label {
+    font-size: 11px; color: #9CA3AF; font-style: italic; margin-top: 4px; display: block;
+}
+
+/* Modulo 10E: Drag and Drop */
+.hotel-draggable {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-card);
+    cursor: grab;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background 0.15s, border-color 0.15s;
+    user-select: none;
+    margin-bottom: 8px;
+}
+.hotel-draggable:hover {
+    border-color: var(--accent-primary);
+    background: var(--accent-light);
+}
+.hotel-draggable:active {
+    cursor: grabbing;
+}
+.scatter-drop-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(37, 99, 235, 0.08);
+    border: 2px dashed var(--accent-primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+.drop-hint {
+    background: white;
+    border: 1px solid var(--accent-primary);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-primary);
+    box-shadow: 0 4px 12px rgba(37,99,235,0.15);
+}
+.projection-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text-primary);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 9999;
+    animation: fadeInOut 1.2s ease forwards;
+}
+@keyframes fadeInOut {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(8px); }
+    20%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+    80%  { opacity: 1; }
+    100% { opacity: 0; }
 }

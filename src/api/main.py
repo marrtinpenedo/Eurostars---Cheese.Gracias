@@ -9,12 +9,12 @@ from dotenv import load_dotenv
 load_dotenv()  # debe ser la primera línea tras los imports
 
 import os
-if not os.getenv("GOOGLE_API_KEY"):
-    print("⚠️  ADVERTENCIA: GOOGLE_API_KEY no encontrada en .env")
-    print("   La explicabilidad de clusters no funcionará.")
-    print("   Añade GOOGLE_API_KEY=... en el fichero .env (sin comillas)")
+if not os.getenv("GOOGLE_CLOUD_PROJECT"):
+    print("⚠️  ADVERTENCIA: GOOGLE_CLOUD_PROJECT no encontrada en .env")
+    print("   La explicabilidad de clusters no funcionará con Vertex AI (ADC).")
+    print("   Añade GOOGLE_CLOUD_PROJECT=... en el fichero .env")
 else:
-    print("✅ GOOGLE_API_KEY cargada correctamente")
+    print("✅ Configuración de Google Cloud (ADC) cargada correctamente")
 
 from src.api.routes import upload, pipeline, clusters, hotels
 

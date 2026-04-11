@@ -3,7 +3,7 @@ from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel
 import logging
 
-from src.matching.hotel_matcher import HotelMatcher
+from src.matching.hotel_matcher import HotelMatcher, compute_hotel_similarity
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -90,11 +90,14 @@ def project_hotel(req: HotelProjectRequest, app_req: Request):
         })
         
     interpretation = f"Clientes afines a {combined_hotel_context}" if len(hotel_names) == 1 else f"Clientes afines a {' y '.join(hotel_names)}"
+    
+    similarity_info = compute_hotel_similarity(req.hotel_ids, hotels_df)
         
     return {
         "hotels": processed_hotels,
         "affine_clusters": results_list,
-        "interpretation": interpretation
+        "interpretation": interpretation,
+        "hotel_similarity": similarity_info
     }
 
 from src.data.loader import DataLoader

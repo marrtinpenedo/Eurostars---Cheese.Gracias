@@ -8,6 +8,58 @@ from scipy.spatial.distance import cdist
 
 logger = logging.getLogger(__name__)
 
+def compute_hotel_similarity(hotel_ids: list[str], hotel_df) -> dict:
+    import numpy as np
+    from sklearn.metrics.pairwise import cosine_similarity
+    from sklearn.preprocessing import MinMaxScaler
+
+    if len(hotel_ids) < 2:
+        return {"show_disclaimer": False, "similarity_score": 1.0, "pairs": []}
+
+    features = ['CITY_BEACH_FLAG', 'CITY_MOUNTAIN_FLAG', 'CITY_HISTORICAL_HERITAGE',
+                'CITY_GASTRONOMY', 'CITY_PRICE_LEVEL', 'STARS']
+    
+    vectors = []
+    names = []
+    for hid in hotel_ids:
+        row = hotel_df[hotel_df['ID'].astype(str) == str(hid)]
+        if row.empty:
+            continue
+        vec = row[features].fillna(0).values[0].astype(float)
+        vectors.append(vec)
+        names.append(row['HOTEL_NAME'].values[0])
+
+    if len(vectors) < 2:
+        return {"show_disclaimer": False, "similarity_score": 1.0, "pairs": []}
+
+    # Normalizar y calcular similitud
+    scaler = MinMaxScaler()
+    vectors_norm = scaler.fit_transform(vectors)
+    sim_matrix = cosine_similarity(vectors_norm)
+    
+    # Score global: media de similitudes entre pares (excluyendo diagonal)
+    n = len(vectors)
+    pairs = []
+    scores = []
+    for i in range(n):
+        for j in range(i+1, n):
+            score = float(sim_matrix[i][j])
+            scores.append(score)
+            pairs.append({
+                "hotel_a": names[i],
+                "hotel_b": names[j],
+                "similarity": round(score, 2)
+            })
+    
+    global_score = sum(scores) / len(scores) if scores else 1.0
+    
+    return {
+        "show_disclaimer": global_score < 0.5,  # umbral: < 50% similitud = disclaimer
+        "similarity_score": round(global_score, 2),
+        "similarity_label": "Alta" if global_score > 0.7 else "Media" if global_score > 0.5 else "Baja",
+        "pairs": pairs
+    }
+
 class HotelMatcher:
     def __init__(self, models_dir: str = "models"):
         self.models_dir = models_dir
