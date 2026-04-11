@@ -22,8 +22,12 @@ El proyecto sigue una arquitectura **monolítica ligera** donde un único motor 
 STAYPRINT abandona los paradigmas tradicionales rígidos para adentrarse en Machine Learning predictivo tridimensional.
 
 ### A. Preprocesado y Feature Engineering (Pandas / Scikit-Learn)
-- Todos los datos numéricos (como *Leadtime*, *Stays*, *ADR*, rango de *EDAD*) y categóricos se preprocesan pasándose por transformaciones One-Hot o imputaciones.
-- Se ha integrado el escalado y homogeneización de los rangos para evitar que variables como el *Gasto Económico* opaquen otros matices sutiles del viajero.
+- **Transformación de Múltiples Ejes (Vector 'STAYPRINT'):** Se evalúan simultáneamente más de 18 componentes por cliente que recogen toda su biografía, divididos en 3 grandes bloques:
+  1. **Naturaleza Transaccional:** `ADR` (Gasto Medio), `Letadime` (Margen de Antelación), y Ratio de Retención (`Last 2 Years Stays`).
+  2. **Topología Geográfica:** Preferencia media hacia Playa, Montaña, Gastronomía o Patrimonio.
+  3. **Demografía e Identidad:** Edad, Género, Geografía Origen y Mes Favorito Ponderado (Moda).
+- **One-Hot Encoding:** Dado que las variables categóricas o literales (el País de Origen o la Moda del Clima Preferido) no se pueden inyectar al hiperespacio matemático matricial, el pipeline aplica *One-Hot Encoding* mediante Pandas (`pd.get_dummies()`). Esto rompe una columna de texto en decenas o centenares de vectores booleanos expandidos independientes (`COUNTRY_ES=1`, `COUNTRY_US=0`...). Así, un crudo de 18 facetas muta en una matriz de más de 100 variables 100% numéricas.
+- **Homogeneización Universal (Standard Scaler):** Ocurriría una perversión estadística si inyectáramos al UMAP vectores donde el campo `Gasto Total` viaja con magnitud "2500" frente a un `Review Score` de "9". Por ello, implementamos `StandardScaler` de Scikit-Learn; el cual normaliza brutalmente las 100 columnas igualándolas métricamente (otorgándoles media 0 y varianza 1). Todo vector queda nivelado para su renderizado dimensional equilibrado.
 
 ### B. Mapeo Vectorial Espacial (UMAP)
 - **Decisión:** Sustitución radical de PCA o t-SNE por **UMAP** (Uniform Manifold Approximation and Projection).
