@@ -18,6 +18,8 @@ class ClusterProfiler:
         if not cols: return "UNKNOWN"
         sums = df[cols].sum()
         if sums.max() == 0: return "UNKNOWN"
+        return sums.idxmax().replace(prefix, "")
+
     def generate_cluster_name(self, cluster_profile: dict, all_cluster_profiles: list[dict]) -> str:
         """
         Genera un nombre único para el cluster combinando el tipo de destino preferido

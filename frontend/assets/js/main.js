@@ -25,7 +25,8 @@ function showView(id) {
 }
 
 window.goToCampaigns = function() {
-    if (window.stayprintState.clusterCards && window.stayprintState.clusterCards.length > 0) {
+    const cards = window.stayprintState.clusterCards;
+    if (cards && cards.length > 0) {
         showView("view-campaigns");
     } else {
         alert("Genera los segmentos primero procesando los datos.");
@@ -286,8 +287,9 @@ async function handleRemoveHotel(hotelId) {
     
     if (window.stayprintState.activeHotels.length === 0) {
         window.stayprintState.affineClusters = new Set(); // limpiar todo
-        viz3d.clearScatterSelection(); // As a stand-in for clearHotelMarkersFromScatter
-        updateHotelProjection(); // Need to recalculate without hotels to rerender scatter normally
+        // FIX Bug 2: viz3d.clearScatterSelection() no existe — re-renderizamos sin projData
+        // lo que limpia los marcadores de hotel y restaura las opacidades normales
+        updateHotelProjection();
     } else {
         await updateHotelProjection();
     }
