@@ -49,19 +49,22 @@ from src.clustering.explainer import get_full_explanation
 class ExplainRequest(BaseModel):
     hotel_name: Optional[str] = None
 
-from src.clustering.explainer import get_openai_client
+from src.clustering.explainer import get_genai_client
 
-@router.get("/debug/openai")
-async def debug_openai():
+@router.get("/debug/llm")
+async def debug_llm():
     try:
-        client = get_openai_client()
+        from google.genai import types
+        import os
+        client = get_genai_client()
+        model_name = os.environ.get("VERTEX_MODEL", "gemini-2.5-flash")
         # Llamada mínima para verificar autenticación
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": "di ok"}],
-            max_tokens=5
+        response = client.models.generate_content(
+            model=model_name,
+            contents="di ok",
+            config=types.GenerateContentConfig(max_output_tokens=5)
         )
-        return {"status": "ok", "model": "llama-3.3-70b-versatile", "response": response.choices[0].message.content}
+        return {"status": "ok", "model": model_name, "response": response.text}
     except Exception as e:
         return {"status": "error", "detail": str(e)}
 

@@ -18,6 +18,8 @@ class ClusterProfiler:
         if not cols: return "UNKNOWN"
         sums = df[cols].sum()
         if sums.max() == 0: return "UNKNOWN"
+        return sums.idxmax().replace(prefix, "")
+
     def generate_cluster_name(self, cluster_profile: dict, all_cluster_profiles: list[dict]) -> str:
         """
         Genera un nombre único para el cluster combinando el tipo de destino preferido
@@ -159,24 +161,37 @@ class ClusterProfiler:
                 "cluster_id": int(cluster_id),
                 "name": "",
                 "size": len(cluster_data),
-                "metrics": p_metrics
+                "metrics": p_metrics,
+                "centroid_2d": [float(centroids_3d[cluster_id][0]), float(centroids_3d[cluster_id][1])]
             })
             
-        from src.clustering.explainer import get_openai_client
-        openai_client = get_openai_client()
+        from src.clustering.explainer import get_genai_client
+        genai_client = get_genai_client()
         
-        named_profiles = []
-        for profile in profiles:
+        import concurrent.futures
+        
+        def fetch_name(profile):
             temp_profile = profile['metrics'].copy()
             temp_profile['cluster_id'] = profile['cluster_id']
             temp_profile['cluster_size'] = profile['size']
-            
-            profile['name'] = self.generate_cluster_name_with_llm(
+            # Pasamos todos los perfiles a cada hilo para que el LLM tenga el contexto
+            # El método extrae sus 'metrics' ignorando si ya tienen 'name' o no.
+            name = self.generate_cluster_name_with_llm(
                 cluster_profile=temp_profile,
-                all_cluster_profiles=named_profiles,
-                openai_client=openai_client
+                all_cluster_profiles=profiles,
+                genai_client=genai_client
             )
-            named_profiles.append(profile)
+            return profile['cluster_id'], name
+
+        named_profiles = profiles.copy()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=15) as executor:
+            futures = [executor.submit(fetch_name, p) for p in profiles]
+            for future in concurrent.futures.as_completed(futures):
+                c_id, name = future.result()
+                for p in named_profiles:
+                    if p['cluster_id'] == c_id:
+                        p['name'] = name
+                        break
             
         profiles = self.ensure_unique_names(named_profiles)
             
@@ -187,7 +202,7 @@ class ClusterProfiler:
         profiles.sort(key=lambda x: x["metrics"]["adr"], reverse=True)
         return profiles, global_stats
 
-    def generate_cluster_name_with_llm(self, cluster_profile: dict, all_cluster_profiles: list[dict], openai_client) -> str:
+    def generate_cluster_name_with_llm(self, cluster_profile: dict, all_cluster_profiles: list[dict], genai_client) -> str:
         """
         Genera un nombre único y descriptivo para el cluster usando la API
         """
@@ -226,17 +241,18 @@ OTROS SEGMENTOS YA NOMBRADOS (el tuyo DEBE ser diferente a todos estos):
 Responde solo con el nombre (3-5 palabras en español):"""
 
         try:
-            model_name = os.environ.get("OPENAI_MODEL", "llama-3.3-70b-versatile")
-            response = openai_client.chat.completions.create(
+            from google.genai import types
+            model_name = os.environ.get("VERTEX_MODEL", "gemini-2.5-flash")
+            response = genai_client.models.generate_content(
                 model=model_name,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                max_tokens=20,
-                temperature=0.7
+                contents=user_prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_prompt,
+                    temperature=0.7
+                )
             )
-            name = response.choices[0].message.content.strip().strip('"').strip("'")
+            name = response.text.strip().strip('"').strip("'")
             return name
         except Exception as e:
+            logger.error(f"Error LLM Nombre Cluster: {e}")
             return f"Segmento {cluster_profile['cluster_id']}"

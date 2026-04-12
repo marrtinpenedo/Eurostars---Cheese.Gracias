@@ -44,7 +44,7 @@ export const stayprintAPI = {
         return response.json();
     },
 
-    // 5. Explicar Cluster (OpenAI)
+    // 5. Explicar Cluster (Vertex)
     explainCluster: async (clusterId, hotelName = null) => {
         const response = await fetch(`${API_BASE}/clusters/${clusterId}/explain`, {
             method: 'POST',

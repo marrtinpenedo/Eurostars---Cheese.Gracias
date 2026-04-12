@@ -38,7 +38,7 @@ export const viz3d = {
                 const cId = d.cluster;
                 const isAffine = projData.affine_clusters.some(c => c.cluster_id === cId);
                 if (isAffine) {
-                    affinePrefix = "⭐ AFÍN - ";
+                    affinePrefix = "AFIN - ";
                     hlMode = true;
                 }
             }
@@ -95,8 +95,8 @@ export const viz3d = {
                     z: [hotel.coords_3d[2]],
                     mode: 'markers+text',
                     type: 'scatter3d',
-                    name: `🏨 ${hotel.name}`,
-                    text: [`🏨 ${hotel.name}`],
+                    name: hotel.name,
+                    text: [hotel.name],
                     textposition: 'top center',
                     textfont: { color: '#1A1D23', size: 14, weight: 'bold' },
                     hoverinfo: 'text',
@@ -110,21 +110,29 @@ export const viz3d = {
         }
 
         const layout = {
-            margin: {l: 0, r: 0, b: 0, t: 0},
+            autosize: true,                    /* M4: ocupa 100% del contenedor */
+            margin: {l: 0, r: 0, b: 0, t: 0, pad: 0},
             paper_bgcolor: '#FFFFFF',
             plot_bgcolor: '#F5F6F8',
             scene: {
                 bgcolor: '#F5F6F8',
+                aspectmode: 'cube',            /* M4: proporciones iguales en los 3 ejes */
                 xaxis: { showgrid: true, gridcolor: '#E5E7EB', color: '#6B7280', zeroline: false, showline: false },
                 yaxis: { showgrid: true, gridcolor: '#E5E7EB', color: '#6B7280', zeroline: false, showline: false },
                 zaxis: { showgrid: true, gridcolor: '#E5E7EB', color: '#6B7280', zeroline: false, showline: false },
-                camera: { eye: {x: 1.5, y: 1.5, z: 0.5} }
+                camera: { center: {x: 0, y: 0, z: 0}, eye: {x: 1.5, y: 1.5, z: 1.0} }
             },
             font: { color: '#1A1D23', family: 'Inter, system-ui, sans-serif' },
             showlegend: false
         };
 
-        Plotly.newPlot(container, traces, layout, {displayModeBar: false});
+        Plotly.newPlot(container, traces, layout, {
+            displayModeBar: false,
+            responsive: true,      /* M4: redimensiona con el contenedor */
+            scrollZoom: true
+        });
+        // M4: forzar autosize tras render para centrado correcto
+        window.dispatchEvent(new Event('resize'));
 
         if (onClusterClick) {
             container.on('plotly_click', function(data) {

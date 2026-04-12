@@ -98,10 +98,9 @@ def recluster(req: ReclusterRequest, app_req: Request):
             "guest_id": str(vec.index[i])
         })
         
-    # 4. Optimizador base
-    opt = ClusterOptimizer()
-    res = opt.suggest_optimal_granularity(e15)
-    
+    # FIX Bug 3: No relanzar el optimizador aquí — ya ejecutamos HDBSCAN con el
+    # min_cluster_size solicitado, relanzarlo sobreescribiría el modelo con otro
+    # min_cluster_size y haría 5 ejecuciones extra innecesarias.
     sizes = [c["size"] for c in cards]
     
     return {
@@ -109,5 +108,5 @@ def recluster(req: ReclusterRequest, app_req: Request):
         "silhouette_score": float(score),
         "cluster_sizes": sizes,
         "scatter_data": scatter,
-        "optimal_suggestion": res["optimal_min_cluster_size"]
+        "optimal_suggestion": req.min_cluster_size  # devolvemos el valor usado
     }

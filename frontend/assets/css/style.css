@@ -1,55 +1,88 @@
+.view {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.view.hidden {
+    display: none !important;
+}
+
 :root {
-  /* Fondos */
-  --bg-primary: #F5F6F8;      /* fondo principal gris muy claro */
-  --bg-card: #FFFFFF;          /* cards y paneles blancos */
-  --bg-sidebar: #FFFFFF;       /* panel lateral blanco */
-  --bg-header: #FFFFFF;        /* header blanco con sombra */
+    /* Fondos */
+    --bg-primary: #F5F6F8;
+    /* fondo principal gris muy claro */
+    --bg-card: #FFFFFF;
+    /* cards y paneles blancos */
+    --bg-sidebar: #FFFFFF;
+    /* panel lateral blanco */
+    --bg-header: #FFFFFF;
+    /* header blanco con sombra */
 
-  /* Texto */
-  --text-primary: #1A1D23;     /* texto principal casi negro */
-  --text-secondary: #6B7280;   /* texto secundario gris medio */
-  --text-muted: #9CA3AF;       /* texto terciario gris claro */
+    /* Texto */
+    --text-primary: #1A1D23;
+    /* texto principal casi negro */
+    --text-secondary: #6B7280;
+    /* texto secundario gris medio */
+    --text-muted: #9CA3AF;
+    /* texto terciario gris claro */
 
-  /* Acento corporativo */
-  --accent-primary: #2563EB;   /* azul corporativo — botones, highlights */
-  --accent-hover: #1D4ED8;     /* azul más oscuro para hover */
-  --accent-light: #EFF6FF;     /* azul muy claro para fondos de badge */
+    /* Acento corporativo */
+    --accent-primary: #2563EB;
+    /* azul corporativo — botones, highlights */
+    --accent-hover: #1D4ED8;
+    /* azul más oscuro para hover */
+    --accent-light: #EFF6FF;
+    /* azul muy claro para fondos de badge */
 
-  /* Clusters — paleta diferenciada y visible sobre fondo claro */
-  --cluster-1: #2563EB;   /* azul */
-  --cluster-2: #16A34A;   /* verde */
-  --cluster-3: #DC2626;   /* rojo */
-  --cluster-4: #D97706;   /* naranja */
-  --cluster-5: #7C3AED;   /* púrpura */
-  --cluster-6: #0891B2;   /* cyan */
-  --cluster-7: #BE185D;   /* rosa */
-  --cluster-8: #065F46;   /* verde oscuro */
+    /* Clusters — paleta diferenciada y visible sobre fondo claro */
+    --cluster-1: #2563EB;
+    /* azul */
+    --cluster-2: #16A34A;
+    /* verde */
+    --cluster-3: #DC2626;
+    /* rojo */
+    --cluster-4: #D97706;
+    /* naranja */
+    --cluster-5: #7C3AED;
+    /* púrpura */
+    --cluster-6: #0891B2;
+    /* cyan */
+    --cluster-7: #BE185D;
+    /* rosa */
+    --cluster-8: #065F46;
+    /* verde oscuro */
 
-  /* Hoteles — colores DISTINTOS a los clusters, siempre visibles */
-  --hotel-1: #1A1D23;     /* negro — primer hotel */
-  --hotel-2: #92400E;     /* marrón — segundo hotel */
-  --hotel-3: #4C1D95;     /* morado oscuro — tercer hotel */
-  --hotel-icon-bg: #1A1D23;   /* fondo del icono de hotel */
-  --hotel-icon-color: #FFFFFF; /* icono hotel siempre blanco sobre fondo oscuro */
+    /* Hoteles — colores DISTINTOS a los clusters, siempre visibles */
+    --hotel-1: #1A1D23;
+    /* negro — primer hotel */
+    --hotel-2: #92400E;
+    /* marrón — segundo hotel */
+    --hotel-3: #4C1D95;
+    /* morado oscuro — tercer hotel */
+    --hotel-icon-bg: #1A1D23;
+    /* fondo del icono de hotel */
+    --hotel-icon-color: #FFFFFF;
+    /* icono hotel siempre blanco sobre fondo oscuro */
 
-  /* Bordes y sombras */
-  --border: #E5E7EB;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+    /* Bordes y sombras */
+    --border: #E5E7EB;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.10);
 
-  /* Estados */
-  --success: #16A34A;
-  --warning: #D97706;
-  --priority-gold: #F59E0B;
-  
-  --bg-color: var(--bg-primary);
-  --panel-bg: var(--bg-sidebar);
-  --border-color: var(--border);
-  --text-main: var(--text-primary);
-  --accent: var(--accent-primary);
-  
-  --font-head: 'Outfit', sans-serif;
-  --font-body: 'Inter', sans-serif;
+    /* Estados */
+    --success: #16A34A;
+    --warning: #D97706;
+    --priority-gold: #F59E0B;
+
+    --bg-color: var(--bg-primary);
+    --panel-bg: var(--bg-sidebar);
+    --border-color: var(--border);
+    --text-main: var(--text-primary);
+    --accent: var(--accent-primary);
+
+    --font-head: 'Outfit', sans-serif;
+    --font-body: 'Inter', sans-serif;
 }
 
 * {
@@ -64,7 +97,7 @@ body {
     font-family: var(--font-body);
     height: 100vh;
     overflow: hidden;
-    background-image: 
+    background-image:
         radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
         radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
 }
@@ -80,7 +113,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 2rem;
+    padding: 0.75rem 2rem;
     background: var(--bg-header);
     border-bottom: 1px solid var(--border);
     box-shadow: var(--shadow-sm);
@@ -146,12 +179,17 @@ body {
     border: 1px solid var(--border-color);
     box-shadow: none;
 }
-.btn-outline:hover {
-    background: rgba(255,255,255,0.05);
-}
-.full-width { width: 100%; }
 
-.btn.disabled, .btn:disabled {
+.btn-outline:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.full-width {
+    width: 100%;
+}
+
+.btn.disabled,
+.btn:disabled {
     background: #333;
     color: #666;
     cursor: not-allowed;
@@ -185,7 +223,11 @@ main {
     z-index: 10;
     overflow-y: auto;
 }
-.sidebar-right { border-left: 1px solid var(--border-color); border-right: none;}
+
+.sidebar-right {
+    border-left: 1px solid var(--border-color);
+    border-right: none;
+}
 
 .glass-panel h2 {
     font-family: var(--font-head);
@@ -200,6 +242,11 @@ hr {
     margin: 2rem 0;
 }
 
+/* M3: hr dentro del sidebar izquierdo — más compacto */
+.sidebar-left hr {
+    margin: 0.6rem 0;
+}
+
 .subtitle {
     font-size: 0.85rem;
     color: var(--text-muted);
@@ -209,7 +256,8 @@ hr {
 
 /* CONTROLS */
 .control-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    /* M3: reducido de 1.5rem */
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -236,26 +284,33 @@ input[type=range] {
     width: 100%;
     background: transparent;
 }
+
 input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    height: 16px; width: 16px;
+    height: 16px;
+    width: 16px;
     border-radius: 50%;
     background: var(--accent);
     cursor: pointer;
     margin-top: -6px;
     box-shadow: 0 0 10px var(--accent-glow);
 }
+
 input[type=range]::-webkit-slider-runnable-track {
-    width: 100%; height: 4px;
+    width: 100%;
+    height: 4px;
     cursor: pointer;
     background: var(--border-color);
     border-radius: 2px;
 }
 
-.slider-val { font-size: 0.8rem; color: var(--text-muted); }
+.slider-val {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
 
 select {
-    background: rgba(255,255,255,0.8);
+    background: rgba(255, 255, 255, 0.8);
     border: 1px solid var(--border-color);
     color: var(--text-main);
     padding: 0.6rem;
@@ -272,107 +327,224 @@ select {
 }
 
 #plot3d {
-    width: 100%; height: 100%;
+    width: 100%;
+    height: 100%;
 }
 
 .loader-overlay {
-    position: absolute; inset: 0;
-    background: rgba(248,250,252,0.8);
+    position: absolute;
+    inset: 0;
+    background: rgba(248, 250, 252, 0.8);
     backdrop-filter: blur(4px);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     z-index: 50;
     transition: opacity 0.3s;
 }
+
 .loader-overlay.hidden {
-    opacity: 0; pointer-events: none;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .spinner {
-    width: 40px; height: 40px;
+    width: 40px;
+    height: 40px;
     border: 3px solid var(--border-color);
     border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 1rem;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 
 /* AI PANEL EXPLAINER */
 .state-view {
     transition: opacity 0.3s ease;
 }
-.state-view.hidden { display: none; }
+
+.state-view.hidden {
+    display: none;
+}
 
 .icon-pulse {
-    font-size: 2rem; color: var(--accent);
-    animation: pulse 2s infinite; margin-bottom: 1rem;
+    font-size: 2rem;
+    color: var(--accent);
+    animation: pulse 2s infinite;
+    margin-bottom: 1rem;
 }
+
 @keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.1); opacity: 0.7; }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 /* Skeleton Loading */
 .skeleton-title {
-    height: 24px; width: 60%;
+    height: 24px;
+    width: 60%;
     background: linear-gradient(90deg, #E2E8F0 25%, #F1F5F9 50%, #E2E8F0 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
-    border-radius: 4px; margin-bottom: 1.5rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
 }
+
 .skeleton-line {
-    height: 14px; width: 100%; margin-bottom: 0.8rem;
+    height: 14px;
+    width: 100%;
+    margin-bottom: 0.8rem;
     background: linear-gradient(90deg, #E2E8F0 25%, #F1F5F9 50%, #E2E8F0 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
     border-radius: 4px;
 }
-.skeleton-line.w-80 { width: 80%; }
+
+.skeleton-line.w-80 {
+    width: 80%;
+}
 
 @keyframes loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 /* Results */
-.ai-header { margin-bottom: 1.5rem; }
-.cluster-id-badge {
-    font-size: 0.7rem; color: var(--accent); font-weight: 600;
-    text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.3rem;
+.ai-header {
+    margin-bottom: 1.5rem;
 }
-#ai-title { font-size: 1.2rem; line-height: 1.3; margin-bottom: 0.5rem; color: var(--text-main);}
+
+/* 12C — Icono estrella decorativo Gemini en panel de explicabilidad */
+.ai-star-icon {
+    color: var(--accent-primary);
+    flex-shrink: 0;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
+    margin-bottom: 2px;
+    opacity: 0.9;
+}
+
+.cluster-id-badge {
+    font-size: 0.7rem;
+    color: var(--accent);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 0.3rem;
+}
+
+#ai-title {
+    font-size: 1.2rem;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+
 .metrics-chip {
-    font-size: 0.75rem; background: rgba(0,0,0,0.05);
-    padding: 0.2rem 0.5rem; border-radius: 12px; color: var(--text-muted);
+    font-size: 0.75rem;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    color: var(--text-muted);
 }
 
 .context-banner {
-    background: rgba(219, 39, 119, 0.15); 
+    background: rgba(219, 39, 119, 0.15);
     border-left: 3px solid #DB2777;
-    padding: 0.8rem; border-radius: 4px; font-size: 0.85rem; margin-bottom: 1.5rem;
+    padding: 0.8rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
 }
 
 .bullet-list {
-    list-style: none; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;
-}
-.bullet-list li {
-    font-size: 0.85rem; line-height: 1.5; color: var(--text-main);
-    background: rgba(0,0,0,0.03); padding: 0.8rem; border-radius: 6px;
-    border: 1px solid transparent; transition: border-color 0.2s;
-}
-.bullet-list li:hover {
-    border-color: rgba(0,0,0,0.1);
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
 }
 
-.mt-3 { margin-top: 1.5rem; }
+.bullet-list li {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-main);
+    background: rgba(0, 0, 0, 0.03);
+    padding: 0.8rem;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.bullet-list li:hover {
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.mt-3 {
+    margin-top: 1.5rem;
+}
 
 /* Stats box mini */
-.stats-panel { display: flex; gap: 1rem;}
-.stat-box { flex: 1; background: rgba(0,0,0,0.05); padding: 0.8rem; border-radius: 6px; text-align: center;}
-.stat-title { display: block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
-.stat-value { display: block; font-size: 1.2rem; font-weight: 600; font-family: var(--font-head); margin-top: 0.2rem; color: var(--text-main);}
+.stats-panel {
+    display: flex;
+    gap: 1rem;
+}
+
+.sidebar-left .stats-panel {
+    margin-top: 0.4rem;
+}
+
+/* pegado a la sección de hoteles */
+.stat-box {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 0.6rem;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.stat-title {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 600;
+    font-family: var(--font-head);
+    margin-top: 0.2rem;
+    color: var(--text-main);
+}
 
 /* SEGMENT CARDS */
 .cards-container {
@@ -382,7 +554,9 @@ select {
     z-index: 100;
 }
 
-.cards-container.hidden { display: none; }
+.cards-container.hidden {
+    display: none;
+}
 
 .cards-title {
     font-size: 1rem;
@@ -397,9 +571,20 @@ select {
     gap: 1.5rem;
     padding-bottom: 1rem;
 }
-.cards-scroller::-webkit-scrollbar { height: 8px; }
-.cards-scroller::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
-.cards-scroller::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+
+.cards-scroller::-webkit-scrollbar {
+    height: 8px;
+}
+
+.cards-scroller::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.cards-scroller::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+}
 
 .segment-card {
     min-width: 260px;
@@ -426,37 +611,41 @@ select {
 }
 
 .card-color-indicator {
-    width: 12px; height: 12px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
     /* Se aplicará color dinámico */
 }
 
 /* PILLS */
 .hotel-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  border: 2px solid;
-  background: var(--bg-card);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-primary);
-  margin-right: 8px;
-  margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 2px solid;
+    background: var(--bg-card);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-right: 8px;
+    margin-top: 8px;
 }
+
 .hotel-pill .remove-hotel {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 16px;
-  line-height: 1;
-  padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
 }
+
 .hotel-pill .remove-hotel:hover {
-  color: var(--cluster-3); /* rojo */
+    color: var(--cluster-3);
+    /* rojo */
 }
 
 .card-title {
@@ -550,7 +739,7 @@ select {
     top: 2px;
     left: 2px;
     transition: transform 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .toggle-input:checked {
@@ -571,8 +760,6 @@ select {
 }
 
 .upload-btn-wrapper {
-    position: relative;
-    overflow: hidden;
     display: inline-flex;
 }
 
@@ -602,6 +789,14 @@ select {
 .upload-btn.has-file {
     border-color: var(--success, #16A34A);
     background: #F0FDF4;
+}
+
+/* M5: feedback visual al arrastrar fichero sobre el botón */
+.upload-btn.drag-over {
+    border-style: solid;
+    border-color: var(--accent-primary, #2563EB);
+    background: var(--accent-light, #EFF6FF);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .upload-filename {
@@ -638,4 +833,711 @@ select {
 .btn-process:disabled {
     opacity: 0.45;
     cursor: not-allowed;
+}
+
+/* ─────────────────────────────────────────
+   MÓDULO 4 — Upload en sidebar derecho
+───────────────────────────────────────── */
+
+/* Variante sidebar: apilar botones en columna */
+.csv-upload-sidebar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 0;
+}
+
+.csv-upload-sidebar .upload-btn-wrapper {
+    width: 100%;
+}
+
+.csv-upload-sidebar .upload-btn {
+    width: 100%;
+    min-width: unset;
+}
+
+.csv-upload-sidebar .btn-process {
+    width: 100%;
+    margin-top: 4px;
+}
+
+/* Separador entre upload y panel de clusters */
+.upload-divider {
+    margin: 1.25rem 0;
+    border: 0;
+    height: 1px;
+    background: var(--border-color);
+}
+
+/* ─────────────────────────────────────────
+   MÓDULO 5 — Iconos de navegación en header
+───────────────────────────────────────── */
+
+/* Grupo de los tres iconos SVG decorativos */
+.header-nav-icons {
+    display: flex;
+    gap: 2rem;
+    /* 32px — supera el mínimo de 24px */
+    align-items: center;
+    padding-left: 2rem;
+    margin-left: 2rem;
+    border-left: 1px solid var(--border-color);
+    /* separador visual */
+    flex-shrink: 0;
+}
+
+/* Cada ítem: icono encima, label debajo, centrado */
+.header-nav-icons>div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: default;
+    color: var(--text-secondary);
+    user-select: none;
+}
+
+/* Labels debajo de cada SVG */
+.header-nav-icons span {
+    font-size: 0.75rem;
+    /* 12px */
+    font-family: var(--font-body);
+    line-height: 1;
+    color: var(--text-secondary);
+}
+
+/* Los SVGs heredan color:currentColor del padre */
+.header-nav-icons svg {
+    display: block;
+    flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────
+   MÓDULO 6 — Hotel drag & drop
+───────────────────────────────────────── */
+
+/* Input de filtro */
+.hotel-filter-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    outline: none;
+    margin-bottom: 0.75rem;
+    transition: border-color 0.2s;
+}
+
+.hotel-filter-input:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+/* Grid de tarjetas de hotel — 2 columnas fijas */
+.hotel-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+}
+
+/* Tarjeta individual de hotel */
+.hotel-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.75rem 0.5rem;
+    background: var(--bg-card);
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    cursor: grab;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+    user-select: none;
+    text-align: center;
+    min-height: 80px;
+    justify-content: center;
+}
+
+.hotel-card:hover {
+    border-color: var(--accent-primary);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+    transform: translateY(-1px);
+}
+
+.hotel-card:active {
+    cursor: grabbing;
+}
+
+.hotel-card svg {
+    color: var(--accent-primary);
+    flex-shrink: 0;
+    opacity: 0.75;
+}
+
+.hotel-card-name {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-weight: 500;
+    line-height: 1.25;
+    word-break: break-word;
+    max-width: 100%;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Placeholder: sin hoteles cargados aún */
+.hotel-grid-placeholder {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    padding: 1.5rem 0.5rem;
+    line-height: 1.5;
+    border: 1.5px dashed var(--border-color);
+    border-radius: 10px;
+}
+
+/* Estado: arrastrandose */
+.hotel-card.dragging {
+    opacity: 0.4;
+    cursor: grabbing;
+}
+
+/* Estado: proyectado activo */
+.hotel-card.projected {
+    border-color: var(--accent-primary);
+    background: var(--accent-light);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    cursor: pointer;
+    /* click para quitar */
+}
+
+.hotel-card.projected .hotel-card-name {
+    color: var(--accent-primary);
+    font-weight: 600;
+}
+
+/* Scatter como zona de drop */
+.canvas-container.drop-target {
+    outline: 3px dashed var(--accent-primary);
+    outline-offset: -3px;
+    background: radial-gradient(circle at center, rgba(37, 99, 235, 0.06) 0%, #E2E8F0 100%);
+    transition: outline 0.15s, background 0.15s;
+}
+
+/* Bounce animation para rechazo (4º hotel) */
+@keyframes bounce-reject {
+    0% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-6px);
+    }
+
+    40% {
+        transform: translateX(6px);
+    }
+
+    60% {
+        transform: translateX(-4px);
+    }
+
+    80% {
+        transform: translateX(4px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.hotel-card.bounce {
+    animation: bounce-reject 0.35s ease;
+    border-color: var(--cluster-3);
+    /* rojo de error */
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+}
+
+/* Pills de hoteles proyectados activos (Fix 3) */
+.active-hotels-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+}
+
+.hotel-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 3px 8px 3px 10px;
+    background: var(--accent-light);
+    border: 1.5px solid var(--accent-primary);
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--accent-primary);
+    max-width: 100%;
+}
+
+.hotel-pill-name {
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hotel-pill-remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--accent-primary);
+    font-size: 15px;
+    line-height: 1;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    opacity: 0.7;
+    transition: color 0.15s, opacity 0.15s;
+}
+
+.hotel-pill-remove:hover {
+    color: #DC2626;
+    opacity: 1;
+}
+
+/* Toast de notificación */
+.toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    background: var(--text-primary);
+    color: #fff;
+    padding: 0.65rem 1.25rem;
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    z-index: 9999;
+    opacity: 1;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+}
+
+.toast.fade-out {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+}
+
+/* -------------------------------------
+   VIEW TABS (2D vs 3D) 
+------------------------------------- */
+.view-tabs {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 6px;
+    border-radius: 99px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+    z-index: 100;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 99px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-btn:hover:not(.active) {
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.tab-btn.active {
+    background: var(--accent-primary);
+    color: #FFFFFF;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+}
+
+.view-panel {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#venn-container svg {
+    overflow: visible;
+}
+
+/* ─────────────────────────────────────────
+   MÓDULO 3 — Botón CTA "Ver campañas"
+───────────────────────────────────────── */
+.cta-campaigns-wrapper {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.6rem 1.5rem 0.75rem;
+    background: linear-gradient(to top, rgba(245, 246, 248, 0.95) 60%, transparent);
+    z-index: 20;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    /* centra el botón horizontalmente */
+}
+
+.btn-go-campaigns {
+    display: inline-block;
+    /* auto-width en vez de full-width */
+    width: auto;
+    padding: 0.5rem 2rem;
+    background: var(--accent-primary);
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    pointer-events: all;
+    transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    box-shadow: 0 3px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-go-campaigns:hover:not(:disabled) {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+}
+
+.btn-go-campaigns:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-go-campaigns.btn-disabled,
+.btn-go-campaigns:disabled {
+    background: var(--border);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MÓDULO 5 — Vista 2: Campañas
+═══════════════════════════════════════════════════════════ */
+
+/* Vista 2 — Layout raíz */
+#view-campaigns {
+    background: var(--bg-primary);
+    overflow: hidden;
+}
+
+/* Título del header de Vista 2 */
+.campaigns-title {
+    font-family: var(--font-head);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* Botón ← Volver */
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.9rem;
+    /* 12A: más compacto */
+    background: transparent;
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    /* 12A: pill */
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    /* 12A: font más pequeño */
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    flex-shrink: 0;
+}
+
+.btn-back:hover {
+    background: var(--accent-light);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+/* Body de Vista 2 — scroll vertical, rellena el espacio restante */
+.campaigns-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    background: var(--bg-primary);
+}
+
+.campaigns-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.campaigns-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.campaigns-body::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+/* Grid responsivo */
+.campaigns-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* Mensaje vacío */
+.campaigns-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--text-muted);
+    padding: 4rem 2rem;
+    font-size: 1rem;
+}
+
+/* ── Tarjeta de campaña ── */
+.campaign-card {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.campaign-card:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.campaign-card.expanded {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), var(--shadow-md);
+    transform: none;
+}
+
+/* Header de la tarjeta */
+.cc-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+}
+
+.cc-color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.cc-badge-id {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+}
+
+/* Nombre del segmento */
+.cc-name {
+    font-family: var(--font-head);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.55rem;
+    line-height: 1.3;
+}
+
+/* Métricas compactas */
+.cc-meta {
+    display: flex;
+    gap: 1.25rem;
+    margin-bottom: 0.6rem;
+}
+
+.cc-meta-item {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.cc-adr {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+/* Badge de afinidad hotelera */
+.cc-affinity-badge {
+    display: inline-block;
+    background: rgba(22, 163, 74, 0.1);
+    color: #15803d;
+    border: 1px solid rgba(22, 163, 74, 0.25);
+    border-radius: 9999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.18rem 0.6rem;
+    margin-bottom: 0.65rem;
+}
+
+/* Botón de toggle — "Ver análisis →" */
+.cc-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.cc-toggle-btn:hover {
+    color: var(--accent-hover);
+}
+
+.cc-toggle-arrow {
+    display: inline-block;
+}
+
+/* Área expandible — max-height 0 → 1200px con transition */
+.cc-expand-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+}
+
+.campaign-card.expanded .cc-expand-content {
+    max-height: 1400px;
+}
+
+/* Divisor interno */
+.cc-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1rem 0;
+}
+
+/* Spinner inline */
+.cc-spinner-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.cc-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+}
+
+.cc-spinner-label {
+    color: var(--text-muted);
+}
+
+/* Lista de bullets de IA */
+.cc-bullets {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0;
+}
+
+.cc-bullets li {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--text-primary);
+    background: rgba(37, 99, 235, 0.04);
+    padding: 0.65rem 0.9rem;
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-primary);
+}
+
+/* Zona de exportación */
+.cc-export-wrap {
+    border-top: 1px solid var(--border);
+    padding-top: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.cc-export-hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 0.55rem;
+}
+
+.cc-export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 1rem;
+    background: var(--accent-primary);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.cc-export-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
 }

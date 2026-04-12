@@ -36,27 +36,31 @@ export const dashboard = {
             onSliderChange(val);
         });
 
-        dashboard.els.projectBtn.addEventListener('click', () => {
-            const hid = dashboard.els.hotelDropdown.value;
-            const hname = dashboard.els.hotelDropdown.options[dashboard.els.hotelDropdown.selectedIndex].text;
-            if(hid) {
-                onProjectBtn(hid, hname);
-                // Reset dropdown
-                dashboard.els.hotelDropdown.value = "";
-                dashboard.els.projectBtn.classList.add('disabled');
-                dashboard.els.projectBtn.setAttribute('disabled', 'true');
-            }
-        });
+        // Guard M6: projectBtn y hotelDropdown eliminados del DOM
+        if (dashboard.els.projectBtn) {
+            dashboard.els.projectBtn.addEventListener('click', () => {
+                const hid = dashboard.els.hotelDropdown.value;
+                const hname = dashboard.els.hotelDropdown.options[dashboard.els.hotelDropdown.selectedIndex].text;
+                if(hid) {
+                    onProjectBtn(hid, hname);
+                    dashboard.els.hotelDropdown.value = "";
+                    dashboard.els.projectBtn.classList.add('disabled');
+                    dashboard.els.projectBtn.setAttribute('disabled', 'true');
+                }
+            });
+        }
 
-        dashboard.els.hotelDropdown.addEventListener('change', (e) => {
-            if (e.target.value) {
-                dashboard.els.projectBtn.classList.remove('disabled');
-                dashboard.els.projectBtn.removeAttribute('disabled');
-            } else {
-                dashboard.els.projectBtn.classList.add('disabled');
-                dashboard.els.projectBtn.setAttribute('disabled', 'true');
-            }
-        });
+        if (dashboard.els.hotelDropdown) {
+            dashboard.els.hotelDropdown.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    dashboard.els.projectBtn.classList.remove('disabled');
+                    dashboard.els.projectBtn.removeAttribute('disabled');
+                } else {
+                    dashboard.els.projectBtn.classList.add('disabled');
+                    dashboard.els.projectBtn.setAttribute('disabled', 'true');
+                }
+            });
+        }
 
         dashboard.els.btnExport.addEventListener('click', (e) => {
             const cid = e.target.dataset.clusterId;
@@ -76,7 +80,10 @@ export const dashboard = {
     },
 
     renderActiveHotels: (activeHotels) => {
+        // Guard M6: activeHotelsContainer eliminado del DOM — el feedback visual
+        // es ahora via clase 'projected' en las hotel-cards (syncHotelCardStates)
         const container = dashboard.els.activeHotelsContainer;
+        if (!container) return;
         container.innerHTML = '';
         
         const HOTEL_COLORS = ['#1A1D23', '#92400E', '#4C1D95'];
@@ -87,7 +94,7 @@ export const dashboard = {
             span.style.borderColor = HOTEL_COLORS[index] || '#1A1D23';
             
             span.innerHTML = `
-                🏨 ${hotel.name}
+                ${hotel.name}
                 <button class="remove-hotel" data-id="${hotel.id}">×</button>
             `;
             container.appendChild(span);
@@ -105,18 +112,19 @@ export const dashboard = {
     updateGlobalStats: (data) => {
         dashboard.els.statClusters.textContent = data.n_clusters;
         if (data.optimal_suggestion) {
-            dashboard.els.optBadge.textContent = `Sugerido: ${data.optimal_suggestion} ⭐`;
+            dashboard.els.optBadge.textContent = `Recomendado: ${data.optimal_suggestion}`;
         }
     },
 
     populateHotels: (hotels) => {
         const sel = dashboard.els.hotelDropdown;
+        if (!sel) return; // Guard M6 — dropdown eliminado del DOM, buildHotelGrid() en main.js gestiona el grid
         sel.innerHTML = '<option value="">Selecciona un hotel...</option>';
         hotels.forEach(hotel => {
             const opt = document.createElement('option');
             opt.value = hotel.id;
             
-            const stars = '⭐'.repeat(hotel.stars || 0);
+            const stars = '*'.repeat(hotel.stars || 0);
             const city = hotel.city || 'Desconocida';
             opt.textContent = `${hotel.name} (${city}, ${stars})`;
             
@@ -127,14 +135,19 @@ export const dashboard = {
     renderCards: (cards, onCardClick) => {
         dashboard.lastCards = cards;
         dashboard.lastOnCardClick = onCardClick;
+
+        // Guard M2: el panel inferior fue eliminado del DOM.
+        // La función debe seguir existiendo (se reutiliza en Vista 2 via clusterCards).
+        const cardsContainer = dashboard.els.cardsContainer;
+        const scroller      = dashboard.els.cardsScroller;
+        if (!cardsContainer || !scroller) return;
         
         if (!cards || cards.length === 0) {
-            dashboard.els.cardsContainer.classList.add('hidden');
+            cardsContainer.classList.add('hidden');
             return;
         }
         
-        dashboard.els.cardsContainer.classList.remove('hidden');
-        const scroller = dashboard.els.cardsScroller;
+        cardsContainer.classList.remove('hidden');
         scroller.innerHTML = '';
         
         const colors = [
@@ -147,6 +160,7 @@ export const dashboard = {
         cards.forEach(card => {
             const div = document.createElement('div');
             div.className = 'segment-card';
+            div.dataset.clusterId = card.cluster_id;
             
             const titleStr = useNaturalNames ? (card.name || 'Segmento ' + card.cluster_id) : `Segmento #${card.cluster_id}`;
             const adrVal = card.metrics ? card.metrics.adr : (card.adr_mean || 0);
@@ -156,10 +170,13 @@ export const dashboard = {
                     <span class="card-color-indicator" style="background:${colors[card.cluster_id % colors.length]}"></span>
                     <span class="badge">#${card.cluster_id}</span>
                 </div>
-                <h4 class="card-title" title="${titleStr}">${titleStr}</h4>
+                <h4 class="card-title" title="${titleStr}">
+                    ${titleStr}
+                    <span class="affinity-badge" style="display:none; margin-left: 6px; font-size: 11px; font-weight: 600; color: #166534; background: #DCFCE7; padding: 2px 6px; border-radius: 9999px;"></span>
+                </h4>
                 <div class="card-stats">
-                    <span title="Tamaño del segmento">👥 ${card.size}</span>
-                    <span title="ADR (Average Daily Rate): Gasto promedio diario estimado">💶 €${parseFloat(adrVal).toFixed(0)}</span>
+                    <span title="Tamaño del segmento">${card.size}</span>
+                    <span title="ADR">€${parseFloat(adrVal).toFixed(0)}</span>
                 </div>
             `;
             div.addEventListener('click', () => onCardClick(card.cluster_id));
@@ -186,12 +203,7 @@ export const dashboard = {
         
         dashboard.els.btnExport.dataset.clusterId = resultData.cluster_id;
 
-        if (selectedHotelName && selectedHotelName.trim() !== '' && selectedHotelName !== 'null' && selectedHotelName !== 'undefined') {
-            dashboard.els.aiContextBanner.classList.remove('hidden');
-            dashboard.els.aiContextHotel.textContent = selectedHotelName;
-        } else {
-            dashboard.els.aiContextBanner.classList.add('hidden');
-        }
+        // Old affinity logic removed. Global syncAffinityUI handles sideBadge now.
 
         const ul = dashboard.els.aiBullets;
         ul.innerHTML = '';
@@ -203,8 +215,48 @@ export const dashboard = {
             });
         } else {
             const li = document.createElement('li');
-            li.textContent = "No hay explicación disponible (verifica OpenAI API).";
+            li.textContent = "No hay explicación disponible (verifica Vertex AI).";
             ul.appendChild(li);
         }
+    },
+
+    // Módulo 4 — Resumen estático de Vista 1 (sin llamada a /explain)
+    showClusterSummary: (clusterId) => {
+        const cards = (window.stayprintState && window.stayprintState.clusterCards) || [];
+        // Coerción Number() para evitar fallo string vs int proveniente de Plotly/D3
+        const card = cards.find(c => Number(c.cluster_id) === Number(clusterId));
+
+        // Transición de estado: ocultar empty/loading, mostrar result
+        dashboard.els.aiEmpty.classList.add('hidden');
+        dashboard.els.aiLoading.classList.add('hidden');
+        dashboard.els.aiResult.classList.remove('hidden');
+
+        if (!card) {
+            dashboard.els.aiBadge.textContent = `Segmento #${clusterId}`;
+            dashboard.els.aiTitle.textContent = `Segmento #${clusterId}`;
+            dashboard.els.aiSize.textContent = '';
+            dashboard.els.aiBullets.innerHTML = '';
+            return;
+        }
+
+        const useNaturalNames = document.getElementById('toggle-names')?.checked ?? true;
+        const name = useNaturalNames ? (card.name || `Segmento #${clusterId}`) : `Segmento #${clusterId}`;
+        const m = card.metrics || {};
+        const adr = m.adr != null ? `€${parseFloat(m.adr).toFixed(0)}` : 'N/A';
+        const leadtime = m.booking_leadtime != null ? `${Math.round(m.booking_leadtime)} días` : 'N/A';
+
+        dashboard.els.aiBadge.textContent = `Segmento #${clusterId}`;
+        dashboard.els.aiTitle.textContent = name;
+        dashboard.els.aiSize.textContent = `${card.size || 0} viajeros`;
+        dashboard.els.btnExport.dataset.clusterId = clusterId;
+
+        // 2 líneas estáticas del profiler — sin red, sin /explain
+        const ul = dashboard.els.aiBullets;
+        ul.innerHTML = '';
+        [`ADR medio: ${adr}`, `Antelación media de reserva: ${leadtime}`].forEach(text => {
+            const li = document.createElement('li');
+            li.textContent = text;
+            ul.appendChild(li);
+        });
     }
 };
