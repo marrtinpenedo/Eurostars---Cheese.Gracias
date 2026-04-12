@@ -209,6 +209,11 @@ hr {
     margin: 2rem 0;
 }
 
+/* M3: hr dentro del sidebar izquierdo — más compacto */
+.sidebar-left hr {
+    margin: 0.6rem 0;
+}
+
 .subtitle {
     font-size: 0.85rem;
     color: var(--text-muted);
@@ -218,7 +223,7 @@ hr {
 
 /* CONTROLS */
 .control-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;    /* M3: reducido de 1.5rem */
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -620,6 +625,14 @@ select {
 .upload-btn.has-file {
     border-color: var(--success, #16A34A);
     background: #F0FDF4;
+}
+
+/* M5: feedback visual al arrastrar fichero sobre el botón */
+.upload-btn.drag-over {
+    border-style: solid;
+    border-color: var(--accent-primary, #2563EB);
+    background: var(--accent-light, #EFF6FF);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .upload-filename {

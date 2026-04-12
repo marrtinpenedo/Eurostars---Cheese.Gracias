@@ -31,7 +31,7 @@ window.goToCampaigns = function() {
         renderCampaignsView();         // Módulo 5 — construye el grid antes de mostrar
         showView("view-campaigns");
     } else {
-        alert("Genera los segmentos primero procesando los datos.");
+        alert("Primero haz clic en \"Analizar clientes\" para generar los segmentos.");
     }
 };
 
@@ -170,15 +170,15 @@ function initFileUploads() {
         { input: 'customers_csv', btn: 'btn-customers', label: 'filename-customers', key: 'customers' },
         { input: 'hotels_csv',    btn: 'btn-hotels',    label: 'filename-hotels',    key: 'hotels'    }
     ];
-    
+
     const processBtn = document.getElementById('btn-upload');
     const filesSelected = { customers: false, hotels: false };
-    
+
     uploads.forEach(({ input, btn, label, key }) => {
         const inputEl = document.getElementById(input);
         const btnEl   = document.getElementById(btn);
         const labelEl = document.getElementById(label);
-        
+
         if (inputEl) {
             inputEl.addEventListener('change', function() {
                 if (this.files.length > 0) {
@@ -191,12 +191,38 @@ function initFileUploads() {
                     btnEl.classList.remove('has-file');
                     filesSelected[key] = false;
                 }
-                // Habilitar botón solo cuando ambos CSVs están seleccionados
                 processBtn.disabled = !(filesSelected.customers && filesSelected.hotels);
+            });
+        }
+
+        // M5 — Drag & drop sobre el boton de upload existente
+        if (btnEl && inputEl) {
+            btnEl.addEventListener('dragover', e => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+                btnEl.classList.add('drag-over');
+            });
+            btnEl.addEventListener('dragleave', e => {
+                if (!btnEl.contains(e.relatedTarget)) btnEl.classList.remove('drag-over');
+            });
+            btnEl.addEventListener('drop', e => {
+                e.preventDefault();
+                btnEl.classList.remove('drag-over');
+                const file = e.dataTransfer.files[0];
+                if (!file) return;
+                if (!file.name.toLowerCase().endsWith('.csv')) {
+                    showToast('Solo se aceptan ficheros .csv');
+                    return;
+                }
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                inputEl.files = dt.files;
+                inputEl.dispatchEvent(new Event('change', { bubbles: true }));
             });
         }
     });
 }
+
 
 async function runPipeline() {
     try {
@@ -246,6 +272,29 @@ async function runPipeline() {
     }
 }
 
+/**
+ * M7 — Pregenera explicaciones de todos los clusters en background.
+ * Llama a /explain sin hotel_name y guarda en explanationCache.
+ * Silencia errores — son opcionales.
+ */
+function pregenerateExplanations(clusters) {
+    if (!clusters || clusters.length === 0) return;
+    const cache = window.stayprintState.explanationCache;
+    clusters.forEach(cluster => {
+        const cid = cluster.cluster_id;
+        if (cid === undefined || cid === -1) return;
+        if (cache[cid] !== undefined) return; // ya en caché
+        fetch(`/api/clusters/${cid}/explain`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hotel_name: null })
+        })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => { if (data) cache[cid] = data; })
+        .catch(() => {}); // silencioso
+    });
+}
+
 async function runRecluster(minSize) {
     viz3d.initPlot();
     try {
@@ -274,6 +323,9 @@ async function runRecluster(minSize) {
 
         // Módulo 3 — activar CTA si hay clusters
         updateCTAButton();
+
+        // M7 — Pregenerar explicaciones en background (sin bloquear UI)
+        pregenerateExplanations(window.stayprintState.clusterCards);
 
     } catch (e) {
         console.error(e);
@@ -587,14 +639,15 @@ function renderCampaignsView() {
     const affine   = window.stayprintState.affineClusters || new Set();
     const hotels   = window.stayprintState.activeHotels   || [];
 
-    // Filtrar ruido (cluster -1) y ordenar por ADR descendente
-    const cards = allCards
-        .filter(c => Number(c.cluster_id) !== -1)
-        .sort((a, b) => {
-            const adrA = a.metrics ? (a.metrics.adr || 0) : (a.adr_mean || 0);
-            const adrB = b.metrics ? (b.metrics.adr || 0) : (b.adr_mean || 0);
-            return adrB - adrA;
-        });
+    // M6: ordenar afines primero (asc por id), luego resto asc, ruido al final
+    const affineCards = allCards
+        .filter(c => Number(c.cluster_id) !== -1 && affine.has(Number(c.cluster_id)))
+        .sort((a, b) => a.cluster_id - b.cluster_id);
+    const restCards = allCards
+        .filter(c => Number(c.cluster_id) !== -1 && !affine.has(Number(c.cluster_id)))
+        .sort((a, b) => a.cluster_id - b.cluster_id);
+    const noiseCards = allCards.filter(c => Number(c.cluster_id) === -1);
+    const cards = [...affineCards, ...restCards, ...noiseCards];
 
     grid.innerHTML = '';
 
