@@ -277,7 +277,7 @@ async function runRecluster(minSize) {
 
     } catch (e) {
         console.error(e);
-        alert("Error en clustering: " + e.message);
+        alert("Error en segmentación: " + e.message);
     } finally {
         document.getElementById('loader-3d').classList.add('hidden');
     }
@@ -634,7 +634,7 @@ function renderCampaignsView() {
                 <div class="cc-divider"></div>
                 <div class="cc-spinner-wrap">
                     <div class="cc-spinner"></div>
-                    <span class="cc-spinner-label">Generando análisis IA…</span>
+                    <span class="cc-spinner-label">Generando análisis…</span>
                 </div>
                 <ul class="cc-bullets"></ul>
                 <div class="cc-export-wrap" style="display:none;">

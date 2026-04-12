@@ -347,6 +347,17 @@ select {
 
 /* Results */
 .ai-header { margin-bottom: 1.5rem; }
+
+/* 12C — Icono estrella decorativo Gemini en panel de explicabilidad */
+.ai-star-icon {
+    color: var(--accent-primary);
+    flex-shrink: 0;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
+    margin-bottom: 2px;
+    opacity: 0.9;
+}
 .cluster-id-badge {
     font-size: 0.7rem; color: var(--accent); font-weight: 600;
     text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.3rem;
@@ -984,28 +995,28 @@ select {
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 1rem 1.5rem;
+    padding: 0.6rem 1.5rem 0.75rem;   /* 12A: más compacto, sube el botón */
     background: linear-gradient(to top, rgba(245,246,248,0.95) 60%, transparent);
     z-index: 20;
-    pointer-events: none; /* el wrapper no bloquea clicks en el scatter */
+    pointer-events: none;
 }
 
 .btn-go-campaigns {
     display: block;
     width: 100%;
-    padding: 0.85rem 1.5rem;
+    padding: 0.55rem 1.4rem;          /* 12A: más compacto */
     background: var(--accent-primary);
     color: #ffffff;
     border: none;
-    border-radius: 10px;
+    border-radius: 999px;             /* 12A: pill completamente redondeado */
     font-family: var(--font-body);
-    font-size: 0.95rem;
+    font-size: 0.85rem;               /* 12A: font más pequeño */
     font-weight: 700;
     letter-spacing: 0.3px;
     cursor: pointer;
-    pointer-events: all; /* el botón sí recibe clicks */
+    pointer-events: all;
     transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
-    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+    box-shadow: 0 3px 12px rgba(37, 99, 235, 0.3);
 }
 
 .btn-go-campaigns:hover:not(:disabled) {
@@ -1051,12 +1062,12 @@ select {
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    padding: 0.45rem 1rem;
+    padding: 0.35rem 0.9rem;          /* 12A: más compacto */
     background: transparent;
     border: 1.5px solid var(--border);
-    border-radius: 8px;
+    border-radius: 999px;             /* 12A: pill */
     font-family: var(--font-body);
-    font-size: 0.875rem;
+    font-size: 0.82rem;               /* 12A: font más pequeño */
     font-weight: 600;
     color: var(--text-primary);
     cursor: pointer;

@@ -51,14 +51,14 @@
         <main>
             <!-- CONTROLES IZQUIERDOS -->
             <aside class="sidebar-left glass-panel">
-                <h2>Control de Inmersión</h2>
+                <h2>Ajustes</h2>
                 <div class="control-group tooltip-container">
                     <label for="cluster-slider">
-                        Granularidad de Segmentos
-                        <span id="optimal-badge" class="badge">Sugerido: 5</span>
+                        Número de segmentos
+                        <span id="optimal-badge" class="badge">Recomendado: 5</span>
                     </label>
                     <input type="range" id="cluster-slider" min="3" max="30" value="5" step="1">
-                    <div class="slider-val">Densidad mínima: <span id="slider-val-display">5</span></div>
+                    <div class="slider-val">Detalle: <span id="slider-val-display">5</span></div>
                 </div>
                 
                 <hr>
@@ -154,7 +154,7 @@
                     </div>
                     <!-- Botón procesar -->
                     <button class="btn-process" id="btn-upload" disabled>
-                        Procesar Geodésica
+                        Analizar clientes
                     </button>
                 </div>
                 <hr class="upload-divider">
@@ -179,7 +179,13 @@
                     <!-- Result Panel -->
                     <div id="ai-result" class="state-view hidden">
                         <header class="ai-header">
-                            <span class="cluster-id-badge" id="ai-id-badge">Segmento #X</span>
+                            <!-- 12C: Icono estrella decorativo estilo Gemini -->
+                            <svg class="ai-star-icon" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2 C12 2 13.5 7 18 8 C13.5 9 12 14 12 14 C12 14 10.5 9 6 8 C10.5 7 12 2 12 2Z" fill="currentColor"/>
+                                <path d="M19 14 C19 14 19.8 16.8 22 17.5 C19.8 18.2 19 21 19 21 C19 21 18.2 18.2 16 17.5 C18.2 16.8 19 14 19 14Z" fill="currentColor" opacity="0.7"/>
+                                <path d="M5 3 C5 3 5.6 5.1 7.5 5.6 C5.6 6.1 5 8.2 5 8.2 C5 8.2 4.4 6.1 2.5 5.6 C4.4 5.1 5 3 5 3Z" fill="currentColor" opacity="0.5"/>
+                            </svg>
+                            <span class="cluster-id-badge" id="ai-id-badge">Selecciona un segmento</span>
                             <h2 id="ai-title">Título Generado</h2>
                             <span class="metrics-chip" id="ai-size-chip">0 viaj.</span>
                         </header>

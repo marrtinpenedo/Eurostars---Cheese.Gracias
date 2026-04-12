@@ -112,7 +112,7 @@ export const dashboard = {
     updateGlobalStats: (data) => {
         dashboard.els.statClusters.textContent = data.n_clusters;
         if (data.optimal_suggestion) {
-            dashboard.els.optBadge.textContent = `Sugerido: ${data.optimal_suggestion}`;
+            dashboard.els.optBadge.textContent = `Recomendado: ${data.optimal_suggestion}`;
         }
     },
 
