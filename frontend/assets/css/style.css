@@ -395,7 +395,8 @@ select {
 
 /* Stats box mini */
 .stats-panel { display: flex; gap: 1rem;}
-.stat-box { flex: 1; background: rgba(0,0,0,0.05); padding: 0.8rem; border-radius: 6px; text-align: center;}
+.sidebar-left .stats-panel { margin-top: 0.4rem; }  /* pegado a la sección de hoteles */
+.stat-box { flex: 1; background: rgba(0,0,0,0.05); padding: 0.6rem; border-radius: 6px; text-align: center;}
 .stat-title { display: block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
 .stat-value { display: block; font-size: 1.2rem; font-weight: 600; font-family: var(--font-head); margin-top: 0.2rem; color: var(--text-main);}
 
@@ -1008,22 +1009,24 @@ select {
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 0.6rem 1.5rem 0.75rem;   /* 12A: más compacto, sube el botón */
+    padding: 0.6rem 1.5rem 0.75rem;
     background: linear-gradient(to top, rgba(245,246,248,0.95) 60%, transparent);
     z-index: 20;
     pointer-events: none;
+    display: flex;
+    justify-content: center;           /* centra el botón horizontalmente */
 }
 
 .btn-go-campaigns {
-    display: block;
-    width: 100%;
-    padding: 0.55rem 1.4rem;          /* 12A: más compacto */
+    display: inline-block;             /* auto-width en vez de full-width */
+    width: auto;
+    padding: 0.5rem 2rem;
     background: var(--accent-primary);
     color: #ffffff;
     border: none;
-    border-radius: 999px;             /* 12A: pill completamente redondeado */
+    border-radius: 999px;
     font-family: var(--font-body);
-    font-size: 0.85rem;               /* 12A: font más pequeño */
+    font-size: 0.82rem;
     font-weight: 700;
     letter-spacing: 0.3px;
     cursor: pointer;
