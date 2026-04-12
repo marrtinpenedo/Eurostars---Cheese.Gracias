@@ -131,8 +131,11 @@ async function init() {
         handleExportCSV
     );
 
-    // Cargar hoteles en dropdown si ya están subidos
+    // Cargar hoteles y construir grid arrastrable
     await loadHotels();
+
+    // Módulo 6 — registrar zonas de drop en ambos scatter containers
+    setupDropZones();
 
     // Botón de ejecución global
     document.getElementById('btn-upload').addEventListener('click', runPipeline);
@@ -144,13 +147,21 @@ async function loadHotels() {
     try {
         const hotels = await stayprintAPI.getHotelsCatalog();
         if (!hotels || hotels.length === 0) {
-            dashboard.els.hotelDropdown.innerHTML = '<option value="">No hay hoteles disponibles</option>';
+            // Guard: hotelDropdown ya no existe en DOM (M6)
+            if (dashboard.els.hotelDropdown) {
+                dashboard.els.hotelDropdown.innerHTML = '<option value="">No hay hoteles disponibles</option>';
+            }
             return;
         }
+        // Legado: populate el dropdown si existe (guard en dashboard.populateHotels)
         dashboard.populateHotels(hotels);
+        // M6: construir grid arrastrable
+        buildHotelGrid(hotels);
     } catch (e) {
         console.error("Error cargando hoteles:", e);
-        dashboard.els.hotelDropdown.innerHTML = '<option value="">Error al cargar hoteles</option>';
+        if (dashboard.els.hotelDropdown) {
+            dashboard.els.hotelDropdown.innerHTML = '<option value="">Error al cargar hoteles</option>';
+        }
     }
 }
 
@@ -190,6 +201,31 @@ function initFileUploads() {
 async function runPipeline() {
     try {
         viz3d.initPlot();
+
+        // FIX C1 — Subir CSVs al backend si el usuario los ha seleccionado
+        const customerInput = document.getElementById('customers_csv');
+        const hotelInput    = document.getElementById('hotels_csv');
+        const hasCustomer   = customerInput && customerInput.files.length > 0;
+        const hasHotel      = hotelInput    && hotelInput.files.length > 0;
+
+        if (hasCustomer || hasHotel) {
+            // Si seleccionaron uno pero no el otro, avisar antes de continuar
+            if (!hasCustomer || !hasHotel) {
+                throw new Error('Debes seleccionar AMBOS archivos CSV (clientes y hoteles).');
+            }
+            const formData = new FormData();
+            formData.append('customer_file', customerInput.files[0]);
+            formData.append('hotel_file',    hotelInput.files[0]);
+
+            const uploadResp = await fetch('/api/upload/', { method: 'POST', body: formData });
+            if (!uploadResp.ok) {
+                const err = await uploadResp.text();
+                throw new Error(`Error al subir los archivos: ${err}`);
+            }
+            console.log('CSVs subidos correctamente a data/raw/');
+        }
+        // Si no hay ficheros seleccionados → usa los de data/raw/ precargados (modo demo)
+
         const execInfo = await stayprintAPI.executePipeline();
         console.log("Pipeline executed", execInfo);
         
@@ -217,6 +253,7 @@ async function runRecluster(minSize) {
         window.stayprintState.numClusters = reclusterData.n_clusters;
         window.stayprintState.activeHotels = []; // reset projection
         dashboard.renderActiveHotels(window.stayprintState.activeHotels);
+        syncHotelCardStates(); // M6
         
         dashboard.updateGlobalStats(reclusterData);
         
@@ -294,21 +331,27 @@ async function updateHotelProjection() {
 async function handleProjectHotel(hotelId, hotelName) {
     if (window.stayprintState.activeHotels.find(h => h.id === hotelId)) return; // duplicados
     if (window.stayprintState.activeHotels.length >= 3) {
-        alert("Máximo 3 hoteles simultáneos");
+        showToast('Máximo 3 hoteles proyectados');
+        // Animación bounce en la tarjeta rechazada (M6)
+        const card = document.querySelector(`[data-hotel-id="${hotelId}"]`);
+        if (card) {
+            card.classList.add('bounce');
+            setTimeout(() => card.classList.remove('bounce'), 400);
+        }
         return;
     }
     window.stayprintState.activeHotels.push({ id: hotelId, name: hotelName });
+    syncHotelCardStates(); // M6
     await updateHotelProjection();
 }
 
 async function handleRemoveHotel(hotelId) {
     window.stayprintState.activeHotels = 
         window.stayprintState.activeHotels.filter(h => h.id !== hotelId);
+    syncHotelCardStates(); // M6
     
     if (window.stayprintState.activeHotels.length === 0) {
         window.stayprintState.affineClusters = new Set(); // limpiar todo
-        // FIX Bug 2: viz3d.clearScatterSelection() no existe — re-renderizamos sin projData
-        // lo que limpia los marcadores de hotel y restaura las opacidades normales
         updateHotelProjection();
     } else {
         await updateHotelProjection();
@@ -342,6 +385,186 @@ async function callExplainCluster(clusterId, hotelName) {
 }
 // Exportar para uso en Vista 2 (Módulo 5)
 window._callExplainCluster = callExplainCluster;
+
+// ═══════════════════════════════════════════════════════════
+// MÓDULO 6 — Hotel Grid Arrastrable
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Construye las tarjetas de hotel en #hotel-cards-grid.
+ * Cada tarjeta es draggable y porta hotel_id y hotel_name en dataTransfer.
+ */
+function buildHotelGrid(hotels) {
+    const grid = document.getElementById('hotel-cards-grid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    if (!hotels || hotels.length === 0) {
+        grid.innerHTML = `<div class="hotel-grid-placeholder">Procesa los datos para ver el catálogo de hoteles</div>`;
+        return;
+    }
+
+    hotels.forEach(hotel => {
+        const card = document.createElement('div');
+        card.className = 'hotel-card';
+        card.draggable = true;
+        card.dataset.hotelId   = hotel.id;
+        card.dataset.hotelName = hotel.name;
+
+        // SVG de edificio (28×28) — tamaño medio, más visible
+        card.innerHTML = `
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 9h18"/>
+                <path d="M9 21V9"/>
+            </svg>
+            <span class="hotel-card-name">${hotel.name}</span>
+        `;
+
+        // Drag events
+        card.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('hotel_id',   hotel.id);
+            e.dataTransfer.setData('hotel_name', hotel.name);
+            e.dataTransfer.effectAllowed = 'copy';
+            card.classList.add('dragging');
+        });
+        card.addEventListener('dragend', () => {
+            card.classList.remove('dragging');
+        });
+
+        // Click en tarjeta proyectada = quitar hotel
+        card.addEventListener('click', () => {
+            if (card.classList.contains('projected')) {
+                handleRemoveHotel(hotel.id);
+            }
+        });
+
+        grid.appendChild(card);
+    });
+
+    // Filtro en tiempo real
+    const filterInput = document.getElementById('hotel-filter-input');
+    if (filterInput) {
+        // Elimina listener previo clonando el nodo (evita duplicados al recargar)
+        const fresh = filterInput.cloneNode(true);
+        filterInput.parentNode.replaceChild(fresh, filterInput);
+        fresh.addEventListener('input', () => {
+            const q = fresh.value.toLowerCase();
+            grid.querySelectorAll('.hotel-card').forEach(c => {
+                const name = c.dataset.hotelName.toLowerCase();
+                c.style.display = name.includes(q) ? '' : 'none';
+            });
+        });
+    }
+}
+
+/**
+ * Sincroniza la clase 'projected' en las hotel-cards según activeHotels.
+ * Llamar cada vez que activeHotels cambie.
+ */
+function syncHotelCardStates() {
+    const activeIds = new Set(
+        window.stayprintState.activeHotels.map(h => String(h.id))
+    );
+    document.querySelectorAll('#hotel-cards-grid .hotel-card').forEach(card => {
+        if (activeIds.has(String(card.dataset.hotelId))) {
+            card.classList.add('projected');
+        } else {
+            card.classList.remove('projected');
+        }
+    });
+
+    // Fix 3 — Sincronizar pills de hoteles activos
+    const pillsContainer = document.getElementById('active-hotels-pills');
+    if (!pillsContainer) return;
+
+    const activeHotels = window.stayprintState.activeHotels;
+
+    if (activeHotels.length === 0) {
+        pillsContainer.style.display = 'none';
+        pillsContainer.innerHTML = '';
+        return;
+    }
+
+    pillsContainer.style.display = 'flex';
+    pillsContainer.innerHTML = '';
+
+    activeHotels.forEach(hotel => {
+        const pill = document.createElement('div');
+        pill.className = 'hotel-pill';
+        pill.innerHTML = `
+            <span class="hotel-pill-name" title="${hotel.name}">${hotel.name}</span>
+            <button class="hotel-pill-remove" data-hotel-id="${hotel.id}" title="Quitar hotel">&times;</button>
+        `;
+        pill.querySelector('.hotel-pill-remove').addEventListener('click', () => {
+            handleRemoveHotel(hotel.id);
+        });
+        pillsContainer.appendChild(pill);
+    });
+}
+window.syncHotelCardStates = syncHotelCardStates;
+
+/**
+ * Muestra un toast temporal con el mensaje dado.
+ */
+function showToast(message) {
+    // Eliminar toast previo si existe
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 350);
+    }, 2200);
+}
+
+/**
+ * Registra los eventos dragover / dragleave / drop
+ * en los dos contenedores del scatter (2D y 3D).
+ */
+function setupDropZones() {
+    const zones = [
+        document.getElementById('venn-container'),
+        document.getElementById('plot3d')
+    ].filter(Boolean);
+
+    zones.forEach(zone => {
+        // Necesitamos añadir al canvas-container para la clase visual drop-target
+        const canvasSection = zone.closest('.canvas-container') || zone;
+
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            canvasSection.classList.add('drop-target');
+        });
+
+        zone.addEventListener('dragleave', (e) => {
+            // Solo quitar si se sale del contenedor real (no de hijos internos)
+            if (!zone.contains(e.relatedTarget)) {
+                canvasSection.classList.remove('drop-target');
+            }
+        });
+
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            canvasSection.classList.remove('drop-target');
+
+            const hotelId   = e.dataTransfer.getData('hotel_id');
+            const hotelName = e.dataTransfer.getData('hotel_name');
+            if (!hotelId) return;
+
+            // handleProjectHotel gestiona la lógica de límite, bounce y proyección
+            handleProjectHotel(hotelId, hotelName);
+        });
+    });
+}
 
 // ═══════════════════════════════════════════════════════════
 // MÓDULO 5 — Vista 2: Grid de tarjetas de campañas

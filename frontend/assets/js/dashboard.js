@@ -36,27 +36,31 @@ export const dashboard = {
             onSliderChange(val);
         });
 
-        dashboard.els.projectBtn.addEventListener('click', () => {
-            const hid = dashboard.els.hotelDropdown.value;
-            const hname = dashboard.els.hotelDropdown.options[dashboard.els.hotelDropdown.selectedIndex].text;
-            if(hid) {
-                onProjectBtn(hid, hname);
-                // Reset dropdown
-                dashboard.els.hotelDropdown.value = "";
-                dashboard.els.projectBtn.classList.add('disabled');
-                dashboard.els.projectBtn.setAttribute('disabled', 'true');
-            }
-        });
+        // Guard M6: projectBtn y hotelDropdown eliminados del DOM
+        if (dashboard.els.projectBtn) {
+            dashboard.els.projectBtn.addEventListener('click', () => {
+                const hid = dashboard.els.hotelDropdown.value;
+                const hname = dashboard.els.hotelDropdown.options[dashboard.els.hotelDropdown.selectedIndex].text;
+                if(hid) {
+                    onProjectBtn(hid, hname);
+                    dashboard.els.hotelDropdown.value = "";
+                    dashboard.els.projectBtn.classList.add('disabled');
+                    dashboard.els.projectBtn.setAttribute('disabled', 'true');
+                }
+            });
+        }
 
-        dashboard.els.hotelDropdown.addEventListener('change', (e) => {
-            if (e.target.value) {
-                dashboard.els.projectBtn.classList.remove('disabled');
-                dashboard.els.projectBtn.removeAttribute('disabled');
-            } else {
-                dashboard.els.projectBtn.classList.add('disabled');
-                dashboard.els.projectBtn.setAttribute('disabled', 'true');
-            }
-        });
+        if (dashboard.els.hotelDropdown) {
+            dashboard.els.hotelDropdown.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    dashboard.els.projectBtn.classList.remove('disabled');
+                    dashboard.els.projectBtn.removeAttribute('disabled');
+                } else {
+                    dashboard.els.projectBtn.classList.add('disabled');
+                    dashboard.els.projectBtn.setAttribute('disabled', 'true');
+                }
+            });
+        }
 
         dashboard.els.btnExport.addEventListener('click', (e) => {
             const cid = e.target.dataset.clusterId;
@@ -76,7 +80,10 @@ export const dashboard = {
     },
 
     renderActiveHotels: (activeHotels) => {
+        // Guard M6: activeHotelsContainer eliminado del DOM — el feedback visual
+        // es ahora via clase 'projected' en las hotel-cards (syncHotelCardStates)
         const container = dashboard.els.activeHotelsContainer;
+        if (!container) return;
         container.innerHTML = '';
         
         const HOTEL_COLORS = ['#1A1D23', '#92400E', '#4C1D95'];
@@ -111,6 +118,7 @@ export const dashboard = {
 
     populateHotels: (hotels) => {
         const sel = dashboard.els.hotelDropdown;
+        if (!sel) return; // Guard M6 — dropdown eliminado del DOM, buildHotelGrid() en main.js gestiona el grid
         sel.innerHTML = '<option value="">Selecciona un hotel...</option>';
         hotels.forEach(hotel => {
             const opt = document.createElement('option');
