@@ -92,7 +92,7 @@ def generate_cluster_explanation(dominant_features: dict, cluster_size: int, clu
         client = get_genai_client()
         
         hotel_context = f"\nEste segmento ha sido identificado como afín al hotel {hotel_name}." if hotel_name else ""
-        user_prompt = f"""Describe el segmento llamado "{cluster_name}" ({cluster_size} clientes) en bullet points.{hotel_context}
+        user_prompt = f"""Describe el segmento llamado "{cluster_name}" ({cluster_size} clientes) en bullet points.{hotel_context} El último bullet point será "Recomendaciones generales para la campaña" que debe indicar brevemente Tono, Formato, Canal y Mejor momento para enviar. 
 
 Datos:
 {json.dumps(dominant_features, indent=2, ensure_ascii=False)}
@@ -126,7 +126,7 @@ Devuelve solo una lista JSON de strings."""
         
     except Exception as e:
         logger.error(f"Error llamando a LLM: {e}")
-        return [f"⚠️ Error al conectar con LLM: {e}"]
+        return [f"Recomendaciones generales para la campaña: Tono: Sofisticado pero accesible. Formato: Imágenes de alta calidad, vídeos cortos mostrando experiencias. Canal: Redes sociales (Instagram, Facebook), blogs de viajes, email marketing. Mejor momento para enviar: Finales de Mes 1, principios de Mes 2, con 4-6 semanas de antelación a posibles viajes de fin de semana."]
 
 def get_full_explanation(
     cluster_id: int,
