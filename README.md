@@ -2,7 +2,7 @@
  
 # NEXUS — Plataforma de Segmentación Analítica
 
-**Impacthon 2026 · Eurostars Hotel Company**
+**Impacthon 2026 · Reto Make Me Want to Travel del equipo Cheese.Gracias, ganador del Impacthon ETSE-USC 2026**
 
 > *"No te conocemos por tu perfil, sino por tu historia."*
 
